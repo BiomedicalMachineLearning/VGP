@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from xarray import DataArray
 
 
 class DataProcessor(object):
@@ -10,14 +11,14 @@ class DataProcessor(object):
     def __init__(
         self,
         sumstats: pd.DataFrame,
-        imputed_snps: np.ndarray,
+        population: DataArray,
     ):
 
         assert type(sumstats) == pd.DataFrame, "Sumstats is not DataFrame!"
-        assert type(imputed_snps) == np.ndarray, "Imputed snps is not an numpy array!"
+        assert type(population) == DataArray, "Imputed snps is not an DataArray!"
 
         self.sumstats = sumstats
-        self.imputed_snps = imputed_snps
+        self.population = population
 
     def clean_snps(self):
         """
@@ -26,7 +27,7 @@ class DataProcessor(object):
         # Remove duplicate SNPs
         self.sumstats = self.sumstats.drop_duplicates("SNP")
 
-        self.imputed_snps = np.unique(self.imputed_snps)
+        self.imputed_snps = np.unique(self.population["variant"]["snp"])
 
         # Remove ambigous SNPs
         self.sumstats = self.sumstats[
