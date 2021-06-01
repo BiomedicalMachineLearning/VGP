@@ -64,6 +64,15 @@ class DataProcessor(object):
         intersected_snps = np.intersect1d(self.sumstats["SNP"], self.imputed_snps)
         self.sumstats = self.sumstats[self.sumstats.SNP.isin(intersected_snps)]
 
+    def check_beta_se(self):
+        """
+        Check the form of beta/se
+        """
+        if "OR" in self.sumstats.columns:
+            self.sumstats["BETA"] = np.log(self.sumstats["OR"])
+        if "BETA" in self.sumstats.columns:
+            self.sumstats["BETA"] = np.log(self.sumstats["BETA"])
+
     def split_chromosomes(self):
         """
         Split chromosomes
@@ -81,10 +90,6 @@ class DataProcessor(object):
         for i, chr_df in enumerate(self.splited_sumstats):
             self.splited_sumstats[i] = chr_df.sort_values("SNP")
 
-    def check_beta_se(self):
-        """
-        Check the form of beta/se
-        """
         return None
 
     def flip_reverse(self):
