@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 from xarray import DataArray
-
+from collections import OrderedDict
 
 class DataProcessor(object):
     """
@@ -19,6 +19,7 @@ class DataProcessor(object):
 
         self.sumstats = sumstats
         self.population = population
+        self.adjusted_ss = OrderedDict()
 
     def clean_snps(self):
         """
