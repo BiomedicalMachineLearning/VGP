@@ -3,6 +3,7 @@ import numpy as np
 from xarray import DataArray
 from collections import OrderedDict
 
+
 class DataProcessor(object):
     """
     Main processor class which contains all preprocessing method
