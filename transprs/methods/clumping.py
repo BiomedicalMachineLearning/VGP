@@ -1,4 +1,4 @@
-from transprs.methods.utils import tmp_extract
+from transprs.utils import tmp_extract
 import subprocess
 import time
 import datetime
@@ -19,16 +19,16 @@ def clumping(
     print("Clumping is running...")
     subprocess.call(
         """
-		plink \
-		    --bfile tmp \
-		    --clump-p1 %s \
-		    --clump-r2 %s \
-		    --clump-kb %s \
-		    --clump tmp_ss \
-		    --clump-snp-field SNP \
-		    --clump-field P \
-		    --out tmp_out
-		"""
+        plink \
+            --bfile tmp \
+            --clump-p1 %s \
+            --clump-r2 %s \
+            --clump-kb %s \
+            --clump tmp_ss \
+            --clump-snp-field SNP \
+            --clump-field P \
+            --out tmp_out
+        """
         % (str(clump_p1), str(clump_r2), str(clump_kb)),
         shell=True,
     )
@@ -36,7 +36,7 @@ def clumping(
     subprocess.call(
         """
     awk 'NR!=1{print $3}' tmp_out.clumped >  tmp_out.valid.snp
-		""",
+        """,
         shell=True,
     )
 
@@ -51,7 +51,7 @@ def clumping(
     subprocess.call(
         """
     rm ./tmp*
-		""",
+        """,
         shell=True,
     )
 

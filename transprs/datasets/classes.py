@@ -21,6 +21,7 @@ class DataProcessor(object):
         self.sumstats = sumstats
         self.population = population
         self.adjusted_ss = OrderedDict()
+        self.prs_results = OrderedDict()
 
     def clean_snps(self):
         """
@@ -71,9 +72,7 @@ class DataProcessor(object):
         Check the form of beta/se
         """
         if "OR" in self.sumstats.columns:
-            self.sumstats["BETA"] = np.log(self.sumstats["OR"])
-        if "BETA" in self.sumstats.columns:
-            self.sumstats["BETA"] = np.log(self.sumstats["BETA"])
+            self.sumstats["OR"] = np.log(self.sumstats["OR"])
 
     def split_chromosomes(self):
         """
