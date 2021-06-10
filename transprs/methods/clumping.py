@@ -46,6 +46,8 @@ def clumping(
         processor.sumstats.SNP.isin(valid_snps)
     ]
 
+    processor.performance["clumping"] = {}
+
     print("The clumping result stores in .adjusted_ss['clumping']!")
 
     subprocess.call(

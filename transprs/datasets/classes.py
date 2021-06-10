@@ -22,6 +22,7 @@ class DataProcessor(object):
         self.population = population
         self.adjusted_ss = OrderedDict()
         self.prs_results = OrderedDict()
+        self.performance = OrderedDict()
 
     def clean_snps(self):
         """
