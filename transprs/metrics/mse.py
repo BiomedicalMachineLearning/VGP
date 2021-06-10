@@ -1,5 +1,6 @@
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
+import pandas as pd
 
 
 def mse(processor, method, use_phenotype, scale=False, verbose=True):
