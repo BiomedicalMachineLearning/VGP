@@ -4,16 +4,17 @@ import pandas as pd
 
 
 def mse(processor, method, use_phenotype, scale=False, verbose=True):
-    merged_df = pd.merge(
-        processor.prs_results[method], processor.phenotype[use_phenotype]
-    )
+    merged_df = pd.merge(processor.prs_results[method], processor.phenotype)
 
     if scale:
         scaler = MinMaxScaler()
-        scaler.fit(merged[["SCORE", use_phenotype]])
+        scaler.fit(merged_df[["SCORE", use_phenotype]])
+        merged_df[["SCORE", use_phenotype]] = scaler.transform(
+            merged_df[["SCORE", use_phenotype]]
+        )
 
     processor.performance[method]["mse"] = mean_squared_error(
-        merged["SCORE"], merged[use_phenotype]
+        merged_df["SCORE"], merged_df[use_phenotype]
     )
 
     if verbose:
