@@ -100,6 +100,11 @@ class DataProcessor(object):
         """
         return None
 
+    def add_phenotype(self, phenotype: pd.DataFrame):
+
+        self.phenotype = phenotype
+        print("Phenotype stored in .phenotype")
+
     # def estimate_heritability(self):
     #     """
     #     Estimate heritability
