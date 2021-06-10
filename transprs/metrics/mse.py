@@ -1,6 +1,7 @@
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 import pandas as pd
+import numpy as np
 
 
 def mse(processor, method, use_phenotype, scale=False, verbose=True):
@@ -13,13 +14,17 @@ def mse(processor, method, use_phenotype, scale=False, verbose=True):
             merged_df[["SCORE", use_phenotype]]
         )
 
-    processor.performance[method]["mse"] = mean_squared_error(
-        merged_df["SCORE"], merged_df[use_phenotype]
-    )
+    mse = mean_squared_error(merged_df["SCORE"], merged_df[use_phenotype])
+
+    processor.performance[method]["mse"] = mse
+
+    processor.performance[method]["rmse"] = np.sqrt(mse)
 
     if verbose:
         print(
             "The MSE performance stored in processor.performance['"
             + method
-            + "']['mse']"
+            + "']['mse'] and processor.performance['"
+            + method
+            + "']['rmse']"
         )
