@@ -1,0 +1,23 @@
+Required libraries and tools:
+    - numpy
+    - pandas
+    - sklearn
+    - plink
+Input:
+    Target data:
+        - QC-ed files: .bed, .bim, .fam
+        - Computed files: covariate .cov, pc .eigenvec
+        - Phenotype file .height
+
+    Base data: QC-ed gwas 
+
+Propcess:
+    - Update base data
+    - Clumping
+    - Generate prs
+    - Evalutate
+the first 2 are more or less preprocessing for plink
+
+Output:
+    - prs file: .profile
+    - score: r2 score of initial model - r2 score of model inclduding prs
