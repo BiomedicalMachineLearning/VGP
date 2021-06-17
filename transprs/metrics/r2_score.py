@@ -1,50 +1,36 @@
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from .utils import model_based_evaluation
 import numpy as np
 
 
-def r2_score(processor):
+def r2_score_evaluation(
+    processor, method, trait_col, prs_col, best_fit_key="best_fit", id_col="FID"
+):
 
-    score_list = []
-    for i in range(len(processor.dataset_repeated_split)):
-        for j in range(len(processor.dataset_repeated_split[0])):
-            train_inds = [
-                x for k, x in enumerate(processor.dataset_repeated_split[i]) if k != j
-            ]
-            train_inds = [item for sublist in train_inds for item in sublist]
-            test_inds = processor.dataset_repeated_split[i][j]
+    # Do repeated k-fold
+    results = {}
+    for pval in processor.prs_results[method].keys():
+        merged_df = pd.merge(processor.prs_results[method][pval], processor.phenotype)
+        score_list = model_based_evaluation(
+            processor,
+            merged_df,
+            trait_col=trait_col,
+            model=LinearRegression(),
+            metric=r2_score,
+            prs_col=prs_col,
+            id_col=id_col,
+        )
+        results[pval] = score_list
 
-            X_train = np.array(
-                [
-                    processor.phenotype[processor.phenotype["FID"].isin(train_inds)][
-                        "Height"
-                    ]
-                ]
-            ).T
-            Y_train = np.array(
-                [
-                    processor.phenotype[processor.phenotype["FID"].isin(train_inds)][
-                        "Height"
-                    ]
-                ]
-            ).T
+    # Get mean each fold
+    mean_results = {}
+    for key in results.keys():
+        mean_results[key] = np.mean(results[key])
 
-            X_test = np.array(
-                [
-                    processor.phenotype[processor.phenotype["FID"].isin(test_inds)][
-                        "Height"
-                    ]
-                ]
-            ).T
-            Y_test = np.array(
-                [
-                    processor.phenotype[processor.phenotype["FID"].isin(test_inds)][
-                        "Height"
-                    ]
-                ]
-            ).T
+    # Get best p-value
+    best_key = min(mean_results, key=mean_results.get)
 
-            model = LinearRegression()
-            model.fit(X_train, Y_train)
-            Y_pred = model.predict(X_test)
-            score_list.append(r2_score(Y_test, Y_pred))
+    processor.prs_results[method][best_fit_key] = processor.prs_results[method][
+        best_key
+    ]

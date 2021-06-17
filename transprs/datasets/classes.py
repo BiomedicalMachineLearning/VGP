@@ -106,6 +106,8 @@ class DataProcessor(object):
         self.phenotype = phenotype
         print("Phenotype stored in .phenotype")
 
+        self.sumstats = self.sumstats[self.sumstats["FID"].isin(phenotype["FID"])]
+
     def cross_validation_split(self, k_folds=3, n_repeats=10):
 
         self.dataset_repeated_split = []
