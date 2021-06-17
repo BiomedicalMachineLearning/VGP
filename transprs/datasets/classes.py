@@ -105,8 +105,8 @@ class DataProcessor(object):
 
         self.phenotype = phenotype
         print("Phenotype stored in .phenotype")
-        processor.population = processor.population.where(
-            processor.population.fid.isin(phenotype[id_col]), drop=True
+        self.population = self.population.where(
+            self.population.fid.isin(phenotype[id_col]), drop=True
         )
 
     def cross_validation_split(self, k_folds=3, n_repeats=10):
