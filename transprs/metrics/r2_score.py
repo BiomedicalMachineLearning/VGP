@@ -43,6 +43,7 @@ def r2_score_evaluation(
         + method
         + "']['"
         + best_fit_key
+        + "']"
     )
 
     processor.performance[method]["r2_score"] = results[best_key]
@@ -50,5 +51,5 @@ def r2_score_evaluation(
     print(
         "The best fit result is stored in processor.performance['"
         + method
-        + "']['r2_score'"
+        + "']['r2_score']"
     )
