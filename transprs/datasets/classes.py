@@ -101,12 +101,13 @@ class DataProcessor(object):
         """
         return None
 
-    def add_phenotype(self, phenotype: pd.DataFrame):
+    def add_phenotype(self, phenotype: pd.DataFrame, id_col="FID"):
 
         self.phenotype = phenotype
         print("Phenotype stored in .phenotype")
-
-        self.sumstats = self.sumstats[self.sumstats["FID"].isin(phenotype["FID"])]
+        processor.population = processor.population.where(
+            processor.population.fid.isin(phenotype[id_col]), drop=True
+        )
 
     def cross_validation_split(self, k_folds=3, n_repeats=10):
 
