@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def model_based_evaluation(
     processor, merged_df, trait_col, prs_col, model, metric, id_col="FID"
 ):
