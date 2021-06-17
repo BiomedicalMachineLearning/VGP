@@ -32,6 +32,15 @@ def r2_score_evaluation(
     # Get best p-value
     best_key = min(mean_results, key=mean_results.get)
 
+    print("The best fit p-value is " + best_key)
+
     processor.prs_results[method][best_fit_key] = processor.prs_results[method][
         best_key
     ]
+
+    print(
+        "The best fit result is stored in processor.prs_results['"
+        + method
+        + "']['"
+        + best_fit_key
+    )
