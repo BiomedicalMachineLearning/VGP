@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from xarray import DataArray
 from collections import OrderedDict
+from random import randrange
 
 
 class DataProcessor(object):
@@ -100,10 +101,32 @@ class DataProcessor(object):
         """
         return None
 
-    def add_phenotype(self, phenotype: pd.DataFrame):
+    def add_phenotype(self, phenotype: pd.DataFrame, id_col="FID"):
 
         self.phenotype = phenotype
         print("Phenotype stored in .phenotype")
+        self.population = self.population.where(
+            self.population.fid.isin(phenotype[id_col]), drop=True
+        )
+
+    def cross_validation_split(self, k_folds=3, n_repeats=10):
+
+        self.dataset_repeated_split = []
+
+        for i in range(n_repeats):
+            dataset_split = []
+            dataset_copy = list(self.phenotype["FID"])
+            fold_size = int(len(self.phenotype["FID"]) / k_folds)
+            for j in range(k_folds):
+                fold = []
+                while len(fold) < fold_size:
+                    index = randrange(len(dataset_copy))
+                    fold.append(dataset_copy.pop(index))
+                dataset_split.append(fold)
+
+            self.dataset_repeated_split.append(dataset_split)
+
+        print("The splitted indexes are stored in .dataset_repeated_split")
 
     # def estimate_heritability(self):
     #     """
