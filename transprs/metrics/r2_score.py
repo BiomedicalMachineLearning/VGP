@@ -1,18 +1,31 @@
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
+from sklearn.preprocessing import MinMaxScaler
 from transprs.metrics.utils import model_based_evaluation
 import numpy as np
 import pandas as pd
 
 
 def r2_score_evaluation(
-    processor, method, trait_col, prs_col, best_fit_key="best_fit", id_col="FID"
+    processor,
+    method,
+    trait_col,
+    prs_col,
+    best_fit_key="best_fit",
+    id_col="FID",
+    scale=True,
 ):
 
     # Do repeated k-fold
     results = {}
     for pval in processor.prs_results[method].keys():
         merged_df = pd.merge(processor.prs_results[method][pval], processor.phenotype)
+        if scale:
+            scaler = MinMaxScaler()
+            scaler.fit(merged_df[[prs_col, trait_col]])
+            merged_df[[prs_col, trait_col]] = scaler.transform(
+                merged_df[[prs_col, trait_col]]
+            )
         score_list = model_based_evaluation(
             processor,
             merged_df,
