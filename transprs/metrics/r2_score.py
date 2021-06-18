@@ -30,7 +30,7 @@ def r2_score_evaluation(
         mean_results[key] = np.mean(results[key])
 
     # Get best p-value
-    best_key = min(mean_results, key=mean_results.get)
+    best_key = max(mean_results, key=mean_results.get)
 
     print("The best fit p-value is " + best_key)
 
