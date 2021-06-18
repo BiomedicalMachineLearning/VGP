@@ -14,6 +14,7 @@ def r2_score_evaluation(
     best_fit_key="best_fit",
     id_col="FID",
     scale=True,
+    optimal_pval_key="optimal_pval",
 ):
 
     # Do repeated k-fold
@@ -50,6 +51,8 @@ def r2_score_evaluation(
     processor.prs_results[method][best_fit_key] = processor.prs_results[method][
         best_key
     ]
+
+    processor.prs_results[method][optimal_pval_key] = best_key
 
     print(
         "The best fit result is stored in processor.prs_results['"
