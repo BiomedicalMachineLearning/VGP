@@ -47,6 +47,7 @@ processor.clean_snps()
 processor.filter_imputed(info=0.9)
 processor.extract_intersection()
 processor.check_beta_se()
+processor.flip_reverse()
 processor.split_chromosomes()
 processor.sort_snps_chr()
 ```
@@ -62,4 +63,3 @@ tprs.scoring.generate_prs(processor,use_col="OR",method="clumping")
 ```
 
 The PRS score will store in `processor.prs_results['clumping']`
-

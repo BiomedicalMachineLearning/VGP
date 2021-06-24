@@ -37,7 +37,7 @@ def generate_prs(processor, use_col, method):
 
     plink \
         --bfile tmp \
-        --score tmp_ss 3 4 %s header sum \
+        --score tmp_ss 3 4 %s header \
         --q-score-range tmp_range_list tmp_SNP.pvalue \
         --out tmp_results
     """
