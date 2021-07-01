@@ -34,9 +34,14 @@ import transprs as tprs
 population = read_plink1_bin("./data/EUR.bed","./data/EUR.bim","./data/EUR.fam")
 # Read sumstats file
 sumstats = pd.read_table("./data/Height.gwas.txt.gz")
+# Read phenotype file
+phenotype = pd.read_table("./data/EUR.height")
 
 # Create the DataProcessor object
 processor = tprs.datasets.DataProcessor(sumstats=sumstats, population=population)
+
+# Add phenotype
+processor.add_phenotype(phenotype)
 
 ```
 
@@ -48,18 +53,37 @@ processor.filter_imputed(info=0.9)
 processor.extract_intersection()
 processor.check_beta_se()
 processor.flip_reverse()
+processor.compute_pca(n_components=6)
 processor.split_chromosomes()
 processor.sort_snps_chr()
+processor.cross_validation_split(id_col="FID",k_folds=5,n_repeats=10)
 ```
 ##### 3. Run the polygenic model to adjust BETA (OR)
 ```python
 # Run the method PRS method: clumping
 tprs.methods.clumping(processor)
+
+# Run the method PRS method: double_weight
+tprs.methods.double_weight(processor)
 ```
 ##### 4. Generate Polygenic Risk Score
 ```python
 # Generate PRS score
 tprs.scoring.generate_prs(processor,use_col="OR",method="clumping")
+tprs.scoring.generate_prs(processor,use_col="OR",method="double_weight")
 ```
 
-The PRS score will store in `processor.prs_results['clumping']`
+##### 5. Evaluation
+```python
+# Run r2 score for each method
+tprs.metrics.r2_score_evaluation(processor,method="clumping", trait_col="Height", prs_col="SCORE")
+tprs.metrics.r2_score_evaluation(processor,method="double_weight", trait_col="Height", prs_col="SCORE")
+```
+
+##### 6. Visualization
+
+```python
+tprs.visualization.visualize_performance(processor, metric="r2_score")
+```
+
+![Visualization](src/img/visualization.png)
