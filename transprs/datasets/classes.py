@@ -211,7 +211,7 @@ class DataProcessor(object):
     def compute_pca(self, n_components, id_col="FID"):
         from transprs.utils import tmp_extract
 
-        tmp_extract(processor)
+        tmp_extract(self)
 
         subprocess.call(
             """
