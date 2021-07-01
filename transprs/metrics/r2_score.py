@@ -15,11 +15,19 @@ def r2_score_evaluation(
     id_col="FID",
     scale=True,
     optimal_pval_key="optimal_pval",
+    use_pca=True,
 ):
+
+    try:
+        del processor.prs_results[method][best_fit_key]
+        del processor.prs_results[method][optimal_pval_key]
+    except:
+        pass
 
     # Do repeated k-fold
     results = {}
     for pval in processor.prs_results[method].keys():
+
         merged_df = pd.merge(processor.prs_results[method][pval], processor.phenotype)
         if scale:
             scaler = MinMaxScaler()
@@ -35,6 +43,7 @@ def r2_score_evaluation(
             metric=r2_score,
             prs_col=prs_col,
             id_col=id_col,
+            use_pca=use_pca,
         )
         results[pval] = score_list
 
