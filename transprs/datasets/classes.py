@@ -3,7 +3,8 @@ import numpy as np
 from xarray import DataArray
 from collections import OrderedDict
 from random import randrange
-from .utils import pre_reader, complement
+from transprs.datasets.utils import pre_reader, complement
+import subprocess
 
 
 class DataProcessor(object):
@@ -206,6 +207,43 @@ class DataProcessor(object):
             self.dataset_repeated_split.append(dataset_split)
 
         print("The splitted indexes are stored in .dataset_repeated_split")
+
+    def compute_pca(self, n_components, id_col="FID"):
+        from transprs.utils import tmp_extract
+
+        tmp_extract(self)
+
+        subprocess.call(
+            """
+        plink \
+            --bfile tmp \
+            --indep-pairwise 200 50 0.25 \
+            --out tmp
+
+        plink \
+            --bfile tmp \
+            --extract tmp.prune.in \
+            --pca %s \
+            --out tmp
+        """
+            % (str(n_components)),
+            shell=True,
+        )
+
+        pca = pd.read_table("tmp.eigenvec", sep=" ", header=None)
+
+        pca.columns = [id_col, "IID"] + ["PC" + str(x) for x in range(0, n_components)]
+
+        self.phenotype = pd.merge(self.phenotype, pca)
+
+        print("PCA result is stored in .phenotype")
+
+        subprocess.call(
+            """
+            rm ./tmp*
+                """,
+            shell=True,
+        )
 
     # def estimate_heritability(self):
     #     """

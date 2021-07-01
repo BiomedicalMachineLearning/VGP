@@ -2,7 +2,7 @@ import numpy as np
 
 
 def model_based_evaluation(
-    processor, merged_df, trait_col, prs_col, model, metric, id_col="FID"
+    processor, merged_df, trait_col, prs_col, model, metric, use_pca, id_col="FID"
 ):
     score_list = []
     for i in range(len(processor.dataset_repeated_split)):
@@ -13,15 +13,35 @@ def model_based_evaluation(
             train_inds = [item for sublist in train_inds for item in sublist]
             test_inds = processor.dataset_repeated_split[i][j]
 
-            X_train = np.array(
-                [merged_df[merged_df[id_col].isin(train_inds)][prs_col]]
-            ).T
+            if use_pca:
+                X_train = np.array(
+                    [
+                        merged_df[merged_df[id_col].isin(train_inds)][
+                            [prs_col] + [i for i in merged_df.columns if "PC" in i]
+                        ]
+                    ]
+                )[0]
+                X_test = np.array(
+                    [
+                        merged_df[merged_df[id_col].isin(test_inds)][
+                            [prs_col] + [i for i in merged_df.columns if "PC" in i]
+                        ]
+                    ]
+                )[0]
+
+            else:
+                X_train = np.array(
+                    [merged_df[merged_df[id_col].isin(train_inds)][prs_col]]
+                ).T
+
+                X_test = np.array(
+                    [merged_df[merged_df[id_col].isin(test_inds)][prs_col]]
+                ).T
 
             Y_train = np.array(
                 [merged_df[merged_df[id_col].isin(train_inds)][trait_col]]
             ).T
 
-            X_test = np.array([merged_df[merged_df[id_col].isin(test_inds)][prs_col]]).T
             Y_test = np.array(
                 [merged_df[merged_df[id_col].isin(test_inds)][trait_col]]
             ).T
