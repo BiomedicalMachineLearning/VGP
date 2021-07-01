@@ -234,7 +234,7 @@ class DataProcessor(object):
 
         pca.columns = [id_col, "IID"] + ["PC" + str(x) for x in range(0, n_components)]
 
-        processor.phenotype = pd.merge(processor.phenotype, pca)
+        self.phenotype = pd.merge(self.phenotype, pca)
 
         print("PCA result is stored in .phenotype")
 
