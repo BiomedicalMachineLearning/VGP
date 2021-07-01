@@ -13,7 +13,7 @@ def visualize_performance(processor, metric, cmap="Dark2", plot_type="box_plot")
     mpl.rcParams["axes.spines.top"] = False
 
     performance_df = pd.DataFrame.from_dict(processor.performance)
-    selected_metric_df = pd.DataFrame(tmp.loc[metric]).T
+    selected_metric_df = pd.DataFrame(performance_df.loc[metric]).T
 
     if plot_type == "box_plot":
         sns.boxplot(data=selected_metric_df.apply(pd.Series.explode), palette=cmap)
