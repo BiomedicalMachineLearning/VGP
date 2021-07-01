@@ -1,5 +1,6 @@
 import seaborn as sns
 import matplotlib as mpl
+import pandas as pd
 
 
 def visualize_performance(processor, metric, cmap="Dark2", plot_type="box_plot"):
