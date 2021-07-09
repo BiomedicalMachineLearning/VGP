@@ -1,4 +1,4 @@
-from transpres.combine import estimate_weighting
+from transprs.combine import estimate_weighting
 
 
 def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCORE"):
