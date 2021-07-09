@@ -9,4 +9,4 @@ def tmp_extract(processor):
         "tmp_ss", sep="\t", index=False
     )
 
-    write_plink1_bin(processor.population, "tmp.bed", verbose=False)
+    write_plink1_bin(processor.population, "tmp.bim", verbose=False)
