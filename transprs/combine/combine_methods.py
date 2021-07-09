@@ -1,12 +1,15 @@
 from transprs.combine import estimate_weighting
 import numpy as np
+import time
+import datetime
+import subprocess
 
 
 def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCORE"):
 
     print("Estimating mixing weights...")
     mixing_weight = estimate_weighting(processor, methods, trait_col, prs_col)
-
+    print("Mixing weights are: " + str(mixing_weight))
     print("Estimating mixing is done!")
 
     print("Adjusted BETA...")
@@ -51,3 +54,8 @@ def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCO
     print("The clumping result stores in .adjusted_ss['" + name_combine + "']!")
 
     processor.performance[name_combine] = {}
+
+    print(
+        "--- Done in %s ---"
+        % (str(datetime.timedelta(seconds=round(time.time() - start_time))))
+    )

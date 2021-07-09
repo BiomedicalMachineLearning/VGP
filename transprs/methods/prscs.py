@@ -1,6 +1,8 @@
 from transprs.methods.prscs_utils import tmp_extract
 import subprocess
 import pandas as pd
+import time
+import datetime
 
 
 def prscs(
@@ -60,3 +62,17 @@ def prscs(
     ]
 
     processor.adjusted_ss["PRScs"][use_col] = df_adj_ss[5].values
+
+    print("The clumping result stores in .adjusted_ss['PRScs']!")
+
+    subprocess.call(
+        """
+    rm ./tmp*
+        """,
+        shell=True,
+    )
+
+    print(
+        "--- Done in %s ---"
+        % (str(datetime.timedelta(seconds=round(time.time() - start_time))))
+    )
