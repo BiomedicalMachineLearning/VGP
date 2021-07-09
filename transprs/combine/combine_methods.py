@@ -3,10 +3,14 @@ from transpres.combine import estimate_weighting
 
 def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCORE"):
 
+    print("Estimating mixing weights...")
     mixing_weight, intercept = estimate_weighting(
         processor, methods, trait_col, prs_col
     )
 
+    print("Estimating mixing is done!")
+
+    print("Adjusted BETA...")
     mixing_results = []
     for method in zip(methods, mixing_weight):
         mixing_results.append(
