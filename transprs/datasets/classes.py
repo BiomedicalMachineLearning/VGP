@@ -59,7 +59,7 @@ class DataProcessor(object):
         ]
 
         self.sumstats["CHR"][
-            ~self.sumstats["CHR"].isin(np.array(range(1, 23)).astype(str))
+            ~self.sumstats["CHR"].isin(np.array(range(1, 23)).astype(int))
         ] = "23"
         self.sumstats["CHR"].astype(int)
 
