@@ -5,9 +5,7 @@ import numpy as np
 def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCORE"):
 
     print("Estimating mixing weights...")
-    mixing_weight, intercept = estimate_weighting(
-        processor, methods, trait_col, prs_col
-    )
+    mixing_weight = estimate_weighting(processor, methods, trait_col, prs_col)
 
     print("Estimating mixing is done!")
 
@@ -35,6 +33,8 @@ def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCO
 
     adjusted_beta = np.sum(mixing_results, axis=0)
 
+    print("Adjusted BETA is done")
+
     if key_ss != None:
         name_combine = key_ss
     else:
@@ -47,5 +47,7 @@ def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCO
     ]
 
     processor.adjusted_ss[name_combine][use_col] = adjusted_beta
+
+    print("The clumping result stores in .adjusted_ss['" + name_combine + "']!")
 
     processor.performance[name_combine] = {}
