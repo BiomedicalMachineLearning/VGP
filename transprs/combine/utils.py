@@ -1,4 +1,5 @@
 from scipy.optimize import nnls
+import numpy as np
 
 
 def nonneg_lstsq(X, y):

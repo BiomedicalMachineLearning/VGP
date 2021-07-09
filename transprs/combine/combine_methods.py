@@ -1,4 +1,5 @@
 from transprs.combine import estimate_weighting
+import numpy as np
 
 
 def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCORE"):
@@ -34,7 +35,10 @@ def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCO
 
     adjusted_beta = np.sum(mixing_results, axis=0)
 
-    name_combine = "+".join(methods)
+    if key_ss != None:
+        name_combine = key_ss
+    else:
+        name_combine = "+".join(methods)
 
     processor.adjusted_ss[name_combine] = processor.sumstats.copy()
 

@@ -1,5 +1,6 @@
 from sklearn.preprocessing import MinMaxScaler
 from .utils import nonneg_lstsq
+import pandas as pd
 
 
 def estimate_weighting(processor, methods, trait_col, prs_col="SCORE"):

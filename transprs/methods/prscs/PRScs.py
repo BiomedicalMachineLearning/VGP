@@ -191,11 +191,11 @@ def main():
     for chrom in param_dict["chrom"]:
         print("##### process chromosome %d #####" % int(chrom))
 
-        if "1kg" in os.path.basename(param_dict["ref_dir"]):
+        if "1kg" in param_dict["ref_dir"]:
             ref_dict = parse_genet.parse_ref(
                 param_dict["ref_dir"] + "/snpinfo_1kg_hm3", int(chrom)
             )
-        elif "ukbb" in os.path.basename(param_dict["ref_dir"]):
+        elif "ukbb" in param_dict["ref_dir"]:
             ref_dict = parse_genet.parse_ref(
                 param_dict["ref_dir"] + "/snpinfo_ukbb_hm3", int(chrom)
             )
