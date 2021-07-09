@@ -7,6 +7,7 @@ import subprocess
 
 def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCORE"):
 
+    start_time = time.time()
     print("Estimating mixing weights...")
     mixing_weight = estimate_weighting(processor, methods, trait_col, prs_col)
     print("Mixing weights are: " + str(mixing_weight))

@@ -3,6 +3,7 @@ import subprocess
 import pandas as pd
 import time
 import datetime
+import os
 
 
 def prscs(
@@ -26,6 +27,9 @@ def prscs(
     """,
         shell=True,
     )
+
+    path = os.path.dirname(transprs.__file__)
+    prscs_path = path + "/methods/prscs/PRScs.py"
 
     ldref_dir = "./data/ldblk_ukbb_eur/"
     ss = "./tmp_ss"
