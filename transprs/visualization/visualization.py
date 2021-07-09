@@ -21,3 +21,5 @@ def visualize_performance(processor, metric, cmap="Dark2", plot_type="box_plot")
         sns.stripplot(
             data=selected_metric_df.apply(pd.Series.explode), color="#333333", alpha=0.5
         )
+
+        mpl.pyplot.xticks(rotation=45)
