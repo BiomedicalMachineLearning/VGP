@@ -4,6 +4,7 @@ import pandas as pd
 import time
 import datetime
 import os
+import transprs
 
 
 def prscs(
@@ -41,10 +42,12 @@ def prscs(
         CHR = i
         subprocess.call(
             "python %s --ref_dir=%s --bim_prefix=%s --sst_file=%s --n_gwas=%s --chrom=%s --phi=%s --out_dir=%s"
-            % (prscs_path, ref_dir, bim, ss, str(N), str(CHR), str(phi), outdir),
+            % (prscs_path, ldref_dir, bim, ss, str(N), str(CHR), str(phi), outdir),
             shell=True,
         )
-        subprocess.call("mv tmp_pst*chr%s.txt tmp_pst_chr%s.txt" % (str(i)), shell=True)
+        subprocess.call(
+            "mv tmp_pst*chr%s.txt tmp_pst_chr%s.txt" % (str(i), str(i)), shell=True
+        )
         print("PRScs for CHR " + str(i) + " is done!")
 
     print("Get adjusted_beta...")
