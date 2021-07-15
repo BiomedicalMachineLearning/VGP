@@ -99,10 +99,8 @@ def pre_reader(sumstat):
         "A2" in cleaned_column
     ), "We cannot detect the A2 (Allele 2) column in the sumstat!"
     assert (
-        "OR" or "BETA"
-    ) in cleaned_column, (
-        "We cannot detect the OR/BETA (Odd ratio/Beta) column in the sumstat!"
-    )
+        "OR" in cleaned_column or "BETA" in cleaned_column
+    ), "We cannot detect the OR/BETA (Odd ratio/Beta) column in the sumstat!"
 
     sumstat.columns = cleaned_column
 
