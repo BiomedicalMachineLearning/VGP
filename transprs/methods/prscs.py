@@ -70,6 +70,8 @@ def prscs(
 
     processor.adjusted_ss["PRScs"][use_col] = df_adj_ss[5].values
 
+    processor.performance["PRScs"] = {}
+
     print("The clumping result stores in .adjusted_ss['PRScs']!")
 
     subprocess.call(
