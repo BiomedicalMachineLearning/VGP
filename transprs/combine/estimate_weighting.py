@@ -1,5 +1,5 @@
 from sklearn.preprocessing import MinMaxScaler
-from .utils import nonneg_lstsq
+from transprs.combine.utils import nonneg_lstsq
 import pandas as pd
 
 
@@ -28,7 +28,7 @@ def estimate_weighting(processor, methods, trait_col, prs_col="SCORE"):
 def estimate_weighting_multipop(processors, methods, trait_col, prs_col="SCORE"):
 
     prs_results = []
-    for processor, method in zip(processprs, methods):
+    for processor, method in zip(processors, methods):
         prs_results.append(processor.prs_results[method]["best_fit"][prs_col])
 
     df_prs_all = pd.concat(prs_results, axis=1).values

@@ -1,4 +1,4 @@
-from transprs.combine import estimate_weighting
+from transprs.combine import estimate_weighting_multipop
 import numpy as np
 import time
 import datetime
@@ -9,7 +9,7 @@ def combine_multipop(processors, methods, trait_col, key_ss, use_col, prs_col="S
 
     start_time = time.time()
     print("Estimating mixing weights...")
-    mixing_weight = estimate_weighting(processors, methods, trait_col, prs_col)
+    mixing_weight = estimate_weighting_multipop(processors, methods, trait_col, prs_col)
     print("Mixing weights are: " + str(mixing_weight))
     print("Estimating mixing is done!")
 
@@ -42,17 +42,17 @@ def combine_multipop(processors, methods, trait_col, key_ss, use_col, prs_col="S
     else:
         name_combine = "+".join(methods)
 
-    processor[0].adjusted_ss[name_combine] = processor[0].sumstats.copy()
+    processors[0].adjusted_ss[name_combine] = processors[0].sumstats.copy()
 
-    processor[0].adjusted_ss[name_combine] = processor[0].adjusted_ss[name_combine][
-        processor[0].adjusted_ss[name_combine].SNP.isin(final_snps)
+    processors[0].adjusted_ss[name_combine] = processors[0].adjusted_ss[name_combine][
+        processors[0].adjusted_ss[name_combine].SNP.isin(final_snps)
     ]
 
-    processor[0].adjusted_ss[name_combine][use_col] = adjusted_beta
+    processors[0].adjusted_ss[name_combine][use_col] = adjusted_beta
 
     print("The clumping result stores in .adjusted_ss['" + name_combine + "']!")
 
-    processor[0].performance[name_combine] = {}
+    processors[0].performance[name_combine] = {}
 
     print(
         "--- Done in %s ---"

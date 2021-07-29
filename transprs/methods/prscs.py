@@ -32,7 +32,6 @@ def prscs(
     path = os.path.dirname(transprs.__file__)
     prscs_path = path + "/methods/prscs/PRScs.py"
 
-    ldref_dir = "./data/ldblk_ukbb_eur/"
     ss = "./tmp_ss"
     outdir = "./tmp"
 
