@@ -49,7 +49,7 @@ def prscsx(
     outname = "tmp"
 
     for i in range(1, 23):
-        print("Applying PRScs for CHR " + str(i) + "...")
+        print("Applying PRScsx for CHR " + str(i) + "...")
         bim = "./tmp" + str(i)
         CHR = i
         subprocess.call(
@@ -58,7 +58,7 @@ def prscsx(
             python %s --ref_dir=%s --bim_prefix=%s --sst_file=%s --pop=%s --n_gwas=%s --chrom=%s --phi=%s --out_dir=%s --outname=%s"
             """
             % (
-                prscs_path,
+                prscsx_path,
                 ldref_dir,
                 bim,
                 ss,
@@ -74,7 +74,7 @@ def prscsx(
         subprocess.call(
             "mv tmp_pst*chr%s.txt tmp_pst_chr%s.txt" % (str(i), str(i)), shell=True
         )
-        print("PRScs for CHR " + str(i) + " is done!")
+        print("PRScsx for CHR " + str(i) + " is done!")
 
     print("Get adjusted_beta...")
 
@@ -89,16 +89,16 @@ def prscsx(
 
     df_adj_ss = df_adj_ss.reset_index(drop=True)
     final_snps = list(set(df_adj_ss[1]) & set(processor.sumstats["SNP"]))
-    processor.adjusted_ss["PRScs"] = processor.sumstats.copy()
-    processor.adjusted_ss["PRScs"] = processor.adjusted_ss["PRScs"][
-        processor.adjusted_ss["PRScs"].SNP.isin(final_snps)
+    processor.adjusted_ss["PRScsx"] = processor.sumstats.copy()
+    processor.adjusted_ss["PRScsx"] = processor.adjusted_ss["PRScsx"][
+        processor.adjusted_ss["PRScsx"].SNP.isin(final_snps)
     ]
 
-    processor.adjusted_ss["PRScs"][use_col] = df_adj_ss[5].values
+    processor.adjusted_ss["PRScsx"][use_col] = df_adj_ss[5].values
 
-    processor.performance["PRScs"] = {}
+    processor.performance["PRScsx"] = {}
 
-    print("The clumping result stores in .adjusted_ss['PRScs']!")
+    print("The clumping result stores in .adjusted_ss['PRScsx']!")
 
     subprocess.call(
         """
