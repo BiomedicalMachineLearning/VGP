@@ -1,4 +1,4 @@
-from transprs.methods.prscs_utils import tmp_extract
+from transprs.methods.multipop.prscsx_utils import tmp_extract
 import subprocess
 import pandas as pd
 import time
@@ -33,7 +33,7 @@ def prscsx(
     )
 
     path = os.path.dirname(transprs.__file__)
-    prscs_path = path + "/methods/multipop/prscsx/PRScsx.py"
+    prscsx_path = path + "/methods/multipop/prscsx/PRScsx.py"
 
     ss = ""
     for i in range(0, len(processors)):
@@ -48,14 +48,15 @@ def prscsx(
 
     outname = "tmp"
 
+    subprocess.call("mkdir tmp", shell=True)
+
     for i in range(1, 23):
         print("Applying PRScsx for CHR " + str(i) + "...")
         bim = "./tmp" + str(i)
         CHR = i
         subprocess.call(
             """
-            mkdir tmp
-            python %s --ref_dir=%s --bim_prefix=%s --sst_file=%s --pop=%s --n_gwas=%s --chrom=%s --phi=%s --out_dir=%s --outname=%s"
+            python %s --ref_dir=%s --bim_prefix=%s --sst_file=%s --pop=%s --n_gwas=%s --chrom=%s --phi=%s --out_dir=%s --out_name=%s
             """
             % (
                 prscsx_path,
@@ -71,32 +72,42 @@ def prscsx(
             ),
             shell=True,
         )
-        subprocess.call(
-            "mv tmp_pst*chr%s.txt tmp_pst_chr%s.txt" % (str(i), str(i)), shell=True
-        )
+
+        for pop in populations.split(","):
+            subprocess.call(
+                "mv tmp/tmp_%s_pst*chr%s.txt tmp/tmp_%s_pst_chr%s.txt"
+                % (pop, str(i), pop, str(i)),
+                shell=True,
+            )
         print("PRScsx for CHR " + str(i) + " is done!")
 
     print("Get adjusted_beta...")
 
-    df_adj_ss = pd.read_table("./tmp_pst_chr1.txt", header=None)
+    for processor, pop in zip(processors, populations.split(",")):
 
-    for i in range(2, 23):
-        try:
-            df_next = pd.read_table("./tmp_pst_chr" + str(i) + ".txt", header=None)
-            df_adj_ss = pd.concat([df_adj_ss.reset_index(drop=True), df_next], axis=0)
-        except:
-            pass
+        df_adj_ss = pd.read_table("tmp/tmp_" + pop + "_pst_chr1.txt", header=None)
 
-    df_adj_ss = df_adj_ss.reset_index(drop=True)
-    final_snps = list(set(df_adj_ss[1]) & set(processor.sumstats["SNP"]))
-    processor.adjusted_ss["PRScsx"] = processor.sumstats.copy()
-    processor.adjusted_ss["PRScsx"] = processor.adjusted_ss["PRScsx"][
-        processor.adjusted_ss["PRScsx"].SNP.isin(final_snps)
-    ]
+        for i in range(2, 23):
+            try:
+                df_next = pd.read_table(
+                    "tmp/tmp_" + pop + "_pst_chr" + str(i) + ".txt", header=None
+                )
+                df_adj_ss = pd.concat(
+                    [df_adj_ss.reset_index(drop=True), df_next], axis=0
+                )
+            except:
+                pass
 
-    processor.adjusted_ss["PRScsx"][use_col] = df_adj_ss[5].values
+        df_adj_ss = df_adj_ss.reset_index(drop=True)
+        final_snps = list(set(df_adj_ss[1]) & set(processor.sumstats["SNP"]))
+        processor.adjusted_ss["PRScsx"] = processor.sumstats.copy()
+        processor.adjusted_ss["PRScsx"] = processor.adjusted_ss["PRScsx"][
+            processor.adjusted_ss["PRScsx"].SNP.isin(final_snps)
+        ]
 
-    processor.performance["PRScsx"] = {}
+        processor.adjusted_ss["PRScsx"][use_col] = df_adj_ss[5].values
+
+        processor.performance["PRScsx"] = {}
 
     print("The clumping result stores in .adjusted_ss['PRScsx']!")
 
