@@ -32,7 +32,6 @@ def prscs(
     path = os.path.dirname(transprs.__file__)
     prscs_path = path + "/methods/prscs/PRScs.py"
 
-    ldref_dir = "./data/ldblk_ukbb_eur/"
     ss = "./tmp_ss"
     outdir = "./tmp"
 
@@ -69,6 +68,8 @@ def prscs(
     ]
 
     processor.adjusted_ss["PRScs"][use_col] = df_adj_ss[5].values
+
+    processor.performance["PRScs"] = {}
 
     print("The clumping result stores in .adjusted_ss['PRScs']!")
 
