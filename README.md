@@ -13,77 +13,9 @@ Only uncompress the Target data (EUR.zip)
 I recommend to use conda to setup the environment
 
 ```
-conda install -c bioconda plink
-pip install pandas-plink
+conda env create -f environment.yml
 ```
 
-### Run the framework
-##### 1. Read files
+### Tutorials
 
-Currently, I only support this format for sumstats then you should make sure your input format is the same.
-
-I will update it next few weeks to support all the variation of column names but the order of columns should be the same.
-
-```python
-# Load libraries
-from pandas_plink import read_plink1_bin
-import pandas as pd
-import transprs as tprs
-
-# Read the population file
-population = read_plink1_bin("./data/EUR.bed","./data/EUR.bim","./data/EUR.fam")
-# Read sumstats file
-sumstats = pd.read_table("./data/Height.gwas.txt.gz")
-# Read phenotype file
-phenotype = pd.read_table("./data/EUR.height")
-
-# Create the DataProcessor object
-processor = tprs.datasets.DataProcessor(sumstats=sumstats, population=population)
-
-# Add phenotype
-processor.add_phenotype(phenotype)
-
-```
-
-##### 2. Run preprocessing
-```python
-# Run preprocessing
-processor.clean_snps()
-processor.filter_imputed(info=0.9)
-processor.extract_intersection()
-processor.check_beta_se()
-processor.flip_reverse()
-processor.compute_pca(n_components=6)
-processor.split_chromosomes()
-processor.sort_snps_chr()
-processor.cross_validation_split(id_col="FID",k_folds=5,n_repeats=10)
-```
-##### 3. Run the polygenic model to adjust BETA (OR)
-```python
-# Run the method PRS method: clumping
-tprs.methods.clumping(processor)
-
-# Run the method PRS method: double_weight
-tprs.methods.double_weight(processor)
-```
-##### 4. Generate Polygenic Risk Score
-```python
-# Generate PRS score
-tprs.scoring.generate_prs(processor,use_col="OR",method="clumping")
-tprs.scoring.generate_prs(processor,use_col="OR",method="double_weight")
-```
-
-##### 5. Evaluation
-```python
-# Run r2 score for each method
-tprs.metrics.r2_score_evaluation(processor,method="clumping", trait_col="Height", prs_col="SCORE")
-tprs.metrics.r2_score_evaluation(processor,method="double_weight", trait_col="Height", prs_col="SCORE")
-```
-
-##### 6. Visualization
-
-```python
-tprs.visualization.visualize_performance(processor, metric="r2_score")
-```
-
-![Visualization](src/img/visualization.png)
+Please check it the `tutorials` folder.
