@@ -1,9 +1,9 @@
 from sklearn.preprocessing import MinMaxScaler
-from transprs.combine.utils import nonneg_lstsq
+from transprs.combine.utils import nonneg_lstsq, ols
 import pandas as pd
 
 
-def estimate_weighting(processor, methods, trait_col, prs_col="SCORE"):
+def estimate_weighting(processor, methods, trait_col, model="ols", prs_col="SCORESUM"):
 
     prs_results = []
     for method in methods:
@@ -20,12 +20,19 @@ def estimate_weighting(processor, methods, trait_col, prs_col="SCORE"):
     scaler.fit(df_pheno)
     df_pheno = scaler.transform(df_pheno)
 
-    mixing_weight, intercepts = nonneg_lstsq(df_prs_all, df_pheno.reshape(1, -1)[0])
+    if model == "nnls":
+        mixing_weight, intercepts = nonneg_lstsq(df_prs_all, df_pheno.reshape(1, -1)[0])
+    elif model == "ols":
+        mixing_weight, intercepts = ols(df_prs_all, df_pheno.reshape(1, -1)[0])
+    else:
+        raise ValueError("Please pick the available model")
 
     return mixing_weight
 
 
-def estimate_weighting_multipop(processors, methods, trait_col, prs_col="SCORE"):
+def estimate_weighting_multipop(
+    processors, methods, trait_col, model="ols", prs_col="SCORESUM"
+):
 
     prs_results = []
     for processor, method in zip(processors, methods):
@@ -42,6 +49,11 @@ def estimate_weighting_multipop(processors, methods, trait_col, prs_col="SCORE")
     scaler.fit(df_pheno)
     df_pheno = scaler.transform(df_pheno)
 
-    mixing_weight, intercepts = nonneg_lstsq(df_prs_all, df_pheno.reshape(1, -1)[0])
+    if model == "nnls":
+        mixing_weight, intercepts = nonneg_lstsq(df_prs_all, df_pheno.reshape(1, -1)[0])
+    elif model == "ols":
+        mixing_weight, intercepts = ols(df_prs_all, df_pheno.reshape(1, -1)[0])
+    else:
+        raise ValueError("Please pick the available model")
 
     return mixing_weight

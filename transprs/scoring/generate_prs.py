@@ -6,7 +6,7 @@ import datetime
 import glob
 
 
-def generate_prs(processor, method):
+def generate_prs(processor, method, use_sum=True):
 
     assert method in processor.adjusted_ss.keys(), (
         "Please run " + method + " before calculate PRS!"
@@ -19,28 +19,50 @@ def generate_prs(processor, method):
     effect_ind = "9"
 
     print("Generating PRS...")
+    if use_sum:
+        subprocess.call(
+            """
+        awk '{print $3,$8}' tmp_ss > tmp_SNP.pvalue
 
-    subprocess.call(
+        echo "0.001 0 0.001" > tmp_range_list
+        echo "0.05 0 0.05" >> tmp_range_list
+        echo "0.1 0 0.1" >> tmp_range_list
+        echo "0.2 0 0.2" >> tmp_range_list
+        echo "0.3 0 0.3" >> tmp_range_list
+        echo "0.4 0 0.4" >> tmp_range_list
+        echo "0.5 0 0.5" >> tmp_range_list
+
+        plink \
+            --bfile tmp \
+            --score tmp_ss 3 4 %s header \
+            --q-score-range tmp_range_list tmp_SNP.pvalue \
+            --out tmp_results
         """
-    awk '{print $3,$8}' tmp_ss > tmp_SNP.pvalue
+            % (str(effect_ind)),
+            shell=True,
+        )
+    else:
+        subprocess.call(
+            """
+        awk '{print $3,$8}' tmp_ss > tmp_SNP.pvalue
 
-    echo "0.001 0 0.001" > tmp_range_list
-    echo "0.05 0 0.05" >> tmp_range_list
-    echo "0.1 0 0.1" >> tmp_range_list
-    echo "0.2 0 0.2" >> tmp_range_list
-    echo "0.3 0 0.3" >> tmp_range_list
-    echo "0.4 0 0.4" >> tmp_range_list
-    echo "0.5 0 0.5" >> tmp_range_list
+        echo "0.001 0 0.001" > tmp_range_list
+        echo "0.05 0 0.05" >> tmp_range_list
+        echo "0.1 0 0.1" >> tmp_range_list
+        echo "0.2 0 0.2" >> tmp_range_list
+        echo "0.3 0 0.3" >> tmp_range_list
+        echo "0.4 0 0.4" >> tmp_range_list
+        echo "0.5 0 0.5" >> tmp_range_list
 
-    plink \
-        --bfile tmp \
-        --score sum tmp_ss 3 4 %s header \
-        --q-score-range tmp_range_list tmp_SNP.pvalue \
-        --out tmp_results
-    """
-        % (str(effect_ind)),
-        shell=True,
-    )
+        plink \
+            --bfile tmp \
+            --score sum tmp_ss 3 4 %s header sum \
+            --q-score-range tmp_range_list tmp_SNP.pvalue \
+            --out tmp_results
+        """
+            % (str(effect_ind)),
+            shell=True,
+        )
 
     print("PRS is generated!")
 
