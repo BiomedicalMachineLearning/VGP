@@ -5,11 +5,13 @@ import datetime
 import subprocess
 
 
-def combine_methods(processor, methods, trait_col, key_ss, use_col, prs_col="SCORE"):
+def combine_methods(
+    processor, methods, trait_col, key_ss, use_col, model="ols", prs_col="SCORE"
+):
 
     start_time = time.time()
     print("Estimating mixing weights...")
-    mixing_weight = estimate_weighting(processor, methods, trait_col, prs_col)
+    mixing_weight = estimate_weighting(processor, methods, trait_col, model, prs_col)
     print("Mixing weights are: " + str(mixing_weight))
     print("Estimating mixing is done!")
 

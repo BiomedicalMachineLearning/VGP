@@ -22,10 +22,8 @@ def estimate_weighting(processor, methods, trait_col, model="ols", prs_col="SCOR
 
     if model == "nnls":
         mixing_weight, intercepts = nonneg_lstsq(df_prs_all, df_pheno.reshape(1, -1)[0])
-    elif model == "ols":
-        mixing_weight, intercepts = ols(df_prs_all, df_pheno.reshape(1, -1)[0])
     else:
-        raise ValueError("Please pick the available model")
+        mixing_weight, intercepts = ols(df_prs_all, df_pheno.reshape(1, -1)[0])
 
     return mixing_weight
 
@@ -51,9 +49,7 @@ def estimate_weighting_multipop(
 
     if model == "nnls":
         mixing_weight, intercepts = nonneg_lstsq(df_prs_all, df_pheno.reshape(1, -1)[0])
-    elif model == "ols":
-        mixing_weight, intercepts = ols(df_prs_all, df_pheno.reshape(1, -1)[0])
     else:
-        raise ValueError("Please pick the available model")
+        mixing_weight, intercepts = ols(df_prs_all, df_pheno.reshape(1, -1)[0])
 
     return mixing_weight
