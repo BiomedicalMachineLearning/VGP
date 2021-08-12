@@ -6,7 +6,7 @@ import datetime
 import glob
 
 
-def generate_prs(processor, use_col, method):
+def generate_prs(processor, method):
 
     assert method in processor.adjusted_ss.keys(), (
         "Please run " + method + " before calculate PRS!"
@@ -16,10 +16,7 @@ def generate_prs(processor, use_col, method):
     tmp_extract(processor, method=method)
     print("Done extract data!")
 
-    if use_col == "OR":
-        effect_ind = "9"
-    else:
-        effect_ind = "12"
+    effect_ind = "9"
 
     print("Generating PRS...")
 
@@ -37,7 +34,7 @@ def generate_prs(processor, use_col, method):
 
     plink \
         --bfile tmp \
-        --score tmp_ss 3 4 %s header \
+        --score sum tmp_ss 3 4 %s header \
         --q-score-range tmp_range_list tmp_SNP.pvalue \
         --out tmp_results
     """
