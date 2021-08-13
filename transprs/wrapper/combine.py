@@ -21,6 +21,7 @@ def Combine_inpop_methods(
             key_ss="+".join(subset),
             use_col=use_col,
             prs_col=prs_col,
+            model=model,
         )
         tprs.scoring.generate_prs(processor, method="+".join(subset))
 
