@@ -3,7 +3,11 @@ import matplotlib as mpl
 import pandas as pd
 
 
-def visualize_performance(processor, metric, cmap="Dark2", plot_type="box_plot"):
+def visualize_performance(
+    processor, metric, cmap="Dark2", plot_type="box_plot", figsize=(7, 7)
+):
+
+    sns.set(rc={"figure.figsize": figsize})
 
     allow_type = ["box_plot", ""]
 

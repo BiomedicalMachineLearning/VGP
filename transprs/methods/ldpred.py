@@ -3,28 +3,20 @@ import time
 import datetime
 import os
 import pandas as pd
+from transprs.utils import tmp_extract
 
 
 def ldpred(
-    bfile_ref,
-    bfile_target,
-    sumstat,
+    processor,
+    use_col,
     N,
     ldf,
     ldr,
     h2,
     fraction_causal,
-    A1="ALT",
-    A2="REF",
-    chr="#CHROM",
-    pos="POS",
     effect="BETA",
-    snpid="ID",
     gibbs_niter=1000,
     burnin=100,
-    ldcoord_out="ldcoord",
-    ldgibbs_out="ldgibbs",
-    out="ldpred_score",
 ):
 
     """
@@ -71,50 +63,67 @@ def ldpred(
     """
 
     start_time = time.time()
+    print("Extracting data...")
+    tmp_extract(processor)
+    print("Done extract data!")
     print("LDpred is running...")
 
-    if os.path.isfile(ldcoord_out):
-        print("Output file (%s) already exists!  Deleting it" % ldcoord_out)
-        os.remove(ldcoord_out)
     subprocess.call(
         """
-            ldpred coord --gf %s --ssf %s --A1 %s --A2 %s --chr \"%s\" --pos %s --eff %s --rs %s --N %s --out %s
+            ldpred coord --gf %s --ssf %s --A1 %s --A2 %s --chr %s --pos %s --eff %s --rs %s --N %s --out %s
             """
-        % (bfile_ref, sumstat, A1, A2, chr, pos, effect, snpid, N, ldcoord_out),
+        % (
+            "tmp",
+            "tmp_ss",
+            "A1",
+            "A2",
+            "CHR",
+            "BP",
+            use_col,
+            "SNP",
+            str(N),
+            "tmp_ldcoord",
+        ),
         shell=True,
     )
 
-    if os.path.isfile(ldgibbs_out):
-        print("Output file (%s) already exists!  Deleting it" % ldgibbs_out)
-        os.remove(ldgibbs_out + ".pkl.gz")
     subprocess.call(
         """
             ldpred gibbs --cf %s --ldr %s --ldf %s --h2 %s --n-iter %s --n-burn-in %s --f %s --out %s
             """
         % (
-            ldcoord_out,
+            "tmp_ldcoord",
             ldr,
             ldf,
             h2,
             gibbs_niter,
             burnin,
             fraction_causal,
-            ldgibbs_out,
+            "tmp_ldgibbs_out",
         ),
         shell=True,
     )
 
-    print("Output to: %s_LDpred-inf.txt" % out)
+    res = pd.read_table("tmp_ldgibbs_out_LDpred-inf.txt", sep="\s+")
+    res = res.reset_index(drop=True)
+    final_snps = list(set(res["sid"]) & set(processor.sumstats["SNP"]))
+    processor.adjusted_ss["ldpred"] = processor.sumstats.copy()
+    processor.adjusted_ss["ldpred"] = processor.adjusted_ss["ldpred"][
+        processor.adjusted_ss["ldpred"].SNP.isin(final_snps)
+    ]
+
+    processor.adjusted_ss["ldpred"][use_col] = res[res.columns[-1]].values
+
+    processor.performance["ldpred"] = {}
+
+    print("The ldpred result stores in .adjusted_ss['ldpred']!")
+
     subprocess.call(
         """
-            ldpred score --gf %s --rf %s --only-score --out %s
-            """
-        % (bfile_target, ldgibbs_out, out),
+    rm ./tmp*
+        """,
         shell=True,
     )
-
-    res = pd.read_csv(out + "_LDpred-inf.txt")
-    res.to_csv(out + "_LDpred.score", index=False, header=["IID", "PRS"])
 
     print(
         "--- Done in %s ---"
