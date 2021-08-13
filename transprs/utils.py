@@ -10,3 +10,7 @@ def tmp_extract(processor, method=None):
     else:
         processor.adjusted_ss[method].to_csv("tmp_ss", sep="\t", index=False)
     write_plink1_bin(processor.population, "tmp.bed", verbose=False)
+
+    processor.phenotype[processor.phenotype.columns[:3]].to_csv(
+        "tmp_phenotype", index=False, sep=" "
+    )

@@ -6,9 +6,7 @@ import pandas as pd
 import transprs as tprs
 
 
-def BayesR(
-    bfile_ref, bfile_target, pheno, pi, h2, mcmc_niter=1000, burnin=50, out="bayesR_out"
-):
+def BayesR(processor, pi, h2, mcmc_niter=1000, burnin=50):
     """
     BayesR
 
@@ -43,41 +41,40 @@ def BayesR(
     # out = "bayesR_out"
     #%%
     start_time = time.time()
+    print("Extracting data...")
+    tmp_extract(processor)
+    print("Done extract data!")
     print("BayesR is running...")
 
-    path = os.path.dirname(tprs.__file__)
-    gctb_path = path + "/softwares/gctb"
-
-    if os.path.isfile(out):
-        print("Output file (%s) already exists!  Deleting it" % out)
-        os.remove(out)
-
     subprocess.call(
         """
-            %s --bfile %s --pheno %s --bayes S --pi %s --hsq %s --chain-length %s --burn-in %s --out %s
+            gctb --bfile %s --pheno %s --bayes S --pi %s --hsq %s --chain-length %s --burn-in %s --out %s
             """
-        % (gctb_path, bfile_ref, pheno, pi, h2, mcmc_niter, burnin, out),
+        % ("tmp", "tmp_phenotype", pi, h2, mcmc_niter, burnin, "tmp_bayesR_out"),
         shell=True,
     )
 
-    ss = pd.read_csv("%s.snpRes" % (out), sep="\s+")
-    selcol = ["Chrom", "Name", "A1", "A2", "A1Effect", "SE", "PIP"]
-    ss = ss[selcol]
-    ss.columns = ["CHR", "ID", "A1", "A2", "BETA", "SE", "P"]
-    ss.to_csv("%s.snpRes_sumstat" % (out), index=None, sep="\t")
+    res = pd.read_csv("%s.snpRes" % ("tmp_bayesR_out"), sep="\s+")
+    res = res.reset_index(drop=True)
+    final_snps = list(set(res["Name"]) & set(processor.sumstats["SNP"]))
+    processor.adjusted_ss["bayesR"] = processor.sumstats.copy()
+    processor.adjusted_ss["bayesR"] = processor.adjusted_ss["bayesR"][
+        processor.adjusted_ss["bayesR"].SNP.isin(final_snps)
+    ]
+
+    res = res[res.Name.isin(final_snps)]
+
+    processor.adjusted_ss["bayesR"][use_col] = res["Effect"].values
+
+    processor.performance["bayesR"] = {}
+
+    print("The bayesR result stores in .adjusted_ss['bayesR']!")
 
     subprocess.call(
         """
-            plink --bfile %s --score %s.snpRes_sumstat 2 3 5 --out %s
-            """
-        % (bfile_target, out, out),
+    rm ./tmp*
+        """,
         shell=True,
-    )
-
-    print("Output to: " + out + ".score_BayesR")
-    res = pd.read_csv(out + ".profile", sep="\s+")
-    res[["IID", "SCORE"]].to_csv(
-        out + "_BayesR.score", index=False, header=["IID", "PRS"]
     )
 
     print(

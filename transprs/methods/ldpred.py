@@ -112,6 +112,8 @@ def ldpred(
         processor.adjusted_ss["ldpred"].SNP.isin(final_snps)
     ]
 
+    res = res[res.sid.isin(final_snps)]
+
     processor.adjusted_ss["ldpred"][use_col] = res[res.columns[-1]].values
 
     processor.performance["ldpred"] = {}

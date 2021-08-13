@@ -23,6 +23,8 @@ class DataProcessor(object):
 
         sumstats = pre_reader(sumstats)
 
+        sumstats = sumstats.dropna(axis=1)
+
         self.sumstats = sumstats
         self.population = population
         self.adjusted_ss = OrderedDict()

@@ -1,7 +1,9 @@
 import transprs as tprs
 
 
-def Combine_inpop_methods(processor, methods, model, prs_col, trait_col, use_col):
+def Combine_inpop_methods(
+    processor, methods, model, prs_col, trait_col, use_col, metric="r2_score"
+):
 
     import itertools
 
@@ -21,6 +23,8 @@ def Combine_inpop_methods(processor, methods, model, prs_col, trait_col, use_col
             prs_col=prs_col,
         )
         tprs.scoring.generate_prs(processor, method="+".join(subset))
-        tprs.metrics.r2_score_evaluation(
-            processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
-        )
+
+        if metric == "metric":
+            tprs.metrics.r2_score_evaluation(
+                processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
+            )
