@@ -24,7 +24,7 @@ def Combine_inpop_methods(
         )
         tprs.scoring.generate_prs(processor, method="+".join(subset))
 
-        if metric == "metric":
+        if metric == "r2_score":
             tprs.metrics.r2_score_evaluation(
                 processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
             )
