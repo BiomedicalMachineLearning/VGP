@@ -24,11 +24,13 @@ def r2_score_evaluation(
     except:
         pass
 
+    phenotype = pd.read_table(processor.phenotype)
+
     # Do repeated k-fold
     results = {}
     for pval in processor.prs_results[method].keys():
 
-        merged_df = pd.merge(processor.prs_results[method][pval], processor.phenotype)
+        merged_df = pd.merge(processor.prs_results[method][pval], phenotype)
         if scale:
             scaler = MinMaxScaler()
             scaler.fit(merged_df[[prs_col, trait_col]])
