@@ -23,7 +23,8 @@ def combine_methods(
 
     snps_list = []
     for method in methods:
-        snps_list.append(set(processor.adjusted_ss[method]["SNP"].values))
+        adjusted_ss = pd.read_table(processor.adjusted_ss[method])
+        snps_list.append(set(adjusted_ss["SNP"].values))
 
     final_snps = set.intersection(*snps_list)
 
