@@ -258,11 +258,11 @@ class DataProcessor(object):
         write_plink1_bin(
             self.population, self.workdir + "/preprocessed_genotype.bed", verbose=False
         )
-        processor.phenotype.to_csv(self.workdir + "/phenotype", index=False, sep="\t")
+        self.phenotype.to_csv(self.workdir + "/phenotype", index=False, sep="\t")
 
-        processor.sumstats = self.workdir + "/preprocessed_sumstats"
-        processor.population = self.workdir + "/preprocessed_genotype"
-        processor.phenotype = self.workdir + "/phenotype"
+        self.sumstats = self.workdir + "/preprocessed_sumstats"
+        self.population = self.workdir + "/preprocessed_genotype"
+        self.phenotype = self.workdir + "/phenotype"
 
     # def estimate_heritability(self):
     #     """
