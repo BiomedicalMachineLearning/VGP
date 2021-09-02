@@ -5,6 +5,8 @@ from collections import OrderedDict
 from random import randrange
 from transprs.datasets.utils import pre_reader, complement
 import subprocess
+from pandas_plink import write_plink1_bin
+import os
 
 
 class DataProcessor(object):
@@ -13,20 +15,18 @@ class DataProcessor(object):
     """
 
     def __init__(
-        self,
-        sumstats: pd.DataFrame,
-        population: DataArray,
+        self, sumstats: pd.DataFrame, population: DataArray, workdir="./workdir"
     ):
 
         assert type(sumstats) == pd.DataFrame, "Sumstats is not DataFrame!"
         assert type(population) == DataArray, "Imputed snps is not an DataArray!"
 
         sumstats = pre_reader(sumstats)
-
         sumstats = sumstats.dropna(axis=1)
 
         self.sumstats = sumstats
         self.population = population
+        self.workdir = workdir
         self.adjusted_ss = OrderedDict()
         self.prs_results = OrderedDict()
         self.performance = OrderedDict()
@@ -246,6 +246,23 @@ class DataProcessor(object):
                 """,
             shell=True,
         )
+
+    def store_path(self):
+        try:
+            os.mkdir("./workdir")
+        except:
+            pass
+        self.sumstats.to_csv(
+            self.workdir + "/preprocessed_sumstats", sep="\t", index=False
+        )
+        write_plink1_bin(
+            self.population, self.workdir + "/preprocessed_genotype.bed", verbose=False
+        )
+        processor.phenotype.to_csv(self.workdir + "/phenotype", index=False, sep="\t")
+
+        processor.sumstats = self.workdir + "/preprocessed_sumstats"
+        processor.population = self.workdir + "/preprocessed_genotype"
+        processor.phenotype = self.workdir + "/phenotype"
 
     # def estimate_heritability(self):
     #     """

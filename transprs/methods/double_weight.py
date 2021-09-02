@@ -11,11 +11,13 @@ def double_weight(processor, top_choice=100000):
 
     start_time = time.time()
 
-    ss = pandas2ri.py2rpy(processor.sumstats)
-
     print("Double weight method is running...")
 
-    robjects.globalenv["ss"] = ss
+    sumstats = pd.read_table(processor.sumstats)
+
+    sumstats = pandas2ri.py2rpy(sumstats)
+
+    robjects.globalenv["ss"] = sumstats
     robjects.globalenv["top_choice"] = top_choice
 
     robjects.r(
@@ -34,7 +36,13 @@ def double_weight(processor, top_choice=100000):
     )
 
     print("Done Double weight!")
-    processor.adjusted_ss["double_weight"] = robjects.globalenv["ss"]
+
+    adjusted_ss = robjects.globalenv["ss"]
+
+    save_path = processor.workdir + "/adjusted_sumstats_double_weight"
+    adjusted_ss.to_csv(save_path, sep="\t", index=False)
+
+    processor.adjusted_ss["double_weight"] = save_path
 
     processor.performance["double_weight"] = {}
 

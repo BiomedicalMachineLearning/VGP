@@ -10,3 +10,5 @@ def Preprocessing(processor, n_components, k_folds, n_repeats, info=0.9, id_col=
     processor.cross_validation_split(
         id_col=id_col, k_folds=k_folds, n_repeats=n_repeats
     )
+
+    processor.store_path()
