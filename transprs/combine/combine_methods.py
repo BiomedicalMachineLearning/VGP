@@ -1,5 +1,6 @@
 from transprs.combine import estimate_weighting
 import numpy as np
+import pandas as pd
 import time
 import datetime
 import subprocess
