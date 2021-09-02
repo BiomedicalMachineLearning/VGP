@@ -13,8 +13,8 @@ def generate_prs(processor, method, use_sum=True):
     )
     start_time = time.time()
     print("Extracting adjusted sumstats from " + method + " method...")
-    tmp_extract(processor, method=method)
-    print("Done extract data!")
+    # tmp_extract(processor, method=method)
+    # print("Done extract data!")
 
     effect_ind = "9"
 
@@ -22,7 +22,7 @@ def generate_prs(processor, method, use_sum=True):
     if use_sum:
         subprocess.call(
             """
-        awk '{print $3,$8}' tmp_ss > tmp_SNP.pvalue
+        awk '{print $3,$8}' %s > tmp_SNP.pvalue
 
         echo "0.001 0 0.001" > tmp_range_list
         echo "0.05 0 0.05" >> tmp_range_list
@@ -33,18 +33,23 @@ def generate_prs(processor, method, use_sum=True):
         echo "0.5 0 0.5" >> tmp_range_list
 
         plink \
-            --bfile tmp \
-            --score tmp_ss 3 4 %s header sum \
+            --bfile %s \
+            --score %s 3 4 %s header sum \
             --q-score-range tmp_range_list tmp_SNP.pvalue \
             --out tmp_results
         """
-            % (str(effect_ind)),
+            % (
+                processor.adjusted_ss[method],
+                processor.population,
+                processor.adjusted_ss[method],
+                str(effect_ind),
+            ),
             shell=True,
         )
     else:
         subprocess.call(
             """
-        awk '{print $3,$8}' tmp_ss > tmp_SNP.pvalue
+        awk '{print $3,$8}' %s > tmp_SNP.pvalue
 
         echo "0.001 0 0.001" > tmp_range_list
         echo "0.05 0 0.05" >> tmp_range_list
@@ -55,12 +60,17 @@ def generate_prs(processor, method, use_sum=True):
         echo "0.5 0 0.5" >> tmp_range_list
 
         plink \
-            --bfile tmp \
-            --score tmp_ss 3 4 %s header \
+            --bfile %s \
+            --score %s 3 4 %s header \
             --q-score-range tmp_range_list tmp_SNP.pvalue \
             --out tmp_results
         """
-            % (str(effect_ind)),
+            % (
+                processor.adjusted_ss[method],
+                processor.population,
+                processor.adjusted_ss[method],
+                str(effect_ind),
+            ),
             shell=True,
         )
 
