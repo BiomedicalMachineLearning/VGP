@@ -11,3 +11,7 @@ def Inner_evaluate(processor, methods, metric, trait_col, prs_col):
             tprs.metrics.r2_score_evaluation(
                 processor, method=method, trait_col=trait_col, prs_col=prs_col
             )
+        elif metric == "coef_square":
+            tprs.metrics.coef_squared_evaluation(
+                processor, method=method, trait_col=trait_col, prs_col=prs_col
+            )
