@@ -62,5 +62,6 @@ def correlation_evaluation(processor, merged_df, trait_col, prs_col, id_col="FID
     R2 = pearsonr(list(merged_df[prs_col]), list(merged_df[trait_col]))[0] ** 2
 
     score_list.append(R2)
+    score_list.append(R2)
 
     return score_list

@@ -44,12 +44,12 @@ def coef_squared_evaluation(
             prs_col=prs_col,
             id_col=id_col,
         )
-        results[pval] = score_list[0]
+        results[pval] = score_list
 
     # Get mean each fold
     mean_results = {}
     for key in results.keys():
-        mean_results[key] = results[key]
+        mean_results[key] = np.mean(results[key])
 
     # Get best p-value
     best_key = max(mean_results, key=mean_results.get)
