@@ -70,10 +70,10 @@ def coef_squared_evaluation(
         + "']"
     )
 
-    processor.performance[method]["r2_score"] = results[best_key]
+    processor.performance[method]["coef_square"] = results[best_key]
 
     print(
         "The best fit result is stored in processor.performance['"
         + method
-        + "']['r2_score']"
+        + "']['coef_square']"
     )
