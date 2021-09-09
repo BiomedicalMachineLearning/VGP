@@ -30,6 +30,10 @@ def Combine_inpop_methods(
             tprs.metrics.r2_score_evaluation(
                 processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
             )
+        elif metric == "coef_square":
+            tprs.metrics.coef_squared_evaluation(
+                processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
+            )
 
 
 def Combine_multipop_methods(
@@ -54,5 +58,9 @@ def Combine_multipop_methods(
 
         if metric == "r2_score":
             tprs.metrics.r2_score_evaluation(
+                processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
+            )
+        elif metric == "coef_square":
+            tprs.metrics.coef_squared_evaluation(
                 processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
             )
