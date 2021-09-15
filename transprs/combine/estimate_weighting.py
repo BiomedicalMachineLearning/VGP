@@ -18,9 +18,9 @@ def estimate_weighting(processor, methods, trait_col, model="ols", prs_col="SCOR
     phenotype = pd.read_table(processor.phenotype)
 
     df_pheno = phenotype[trait_col].values.reshape(-1, 1)
-    scaler = MinMaxScaler()
-    scaler.fit(df_pheno)
-    df_pheno = scaler.transform(df_pheno)
+    # scaler = MinMaxScaler()
+    # scaler.fit(df_pheno)
+    # df_pheno = scaler.transform(df_pheno)
 
     if model == "nnls":
         mixing_weight, intercepts = nonneg_lstsq(df_prs_all, df_pheno.reshape(1, -1)[0])
@@ -47,9 +47,9 @@ def estimate_weighting_multipop(
     phenotype = pd.read_table(processor.phenotype)
 
     df_pheno = phenotype[trait_col].values.reshape(-1, 1)
-    scaler = MinMaxScaler()
-    scaler.fit(df_pheno)
-    df_pheno = scaler.transform(df_pheno)
+    # scaler = MinMaxScaler()
+    # scaler.fit(df_pheno)
+    # df_pheno = scaler.transform(df_pheno)
 
     if model == "nnls":
         mixing_weight, intercepts = nonneg_lstsq(df_prs_all, df_pheno.reshape(1, -1)[0])
