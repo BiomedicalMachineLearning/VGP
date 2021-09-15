@@ -10,7 +10,7 @@ def nonneg_lstsq(X, y):
     # X_mean = X.mean(axis=0)
     # y_c = y - y_mean
     # X_c = X - X_mean
-    coef, _ = nnls(x, y)
+    coef, _ = nnls(X, y)
     y_hat = X.dot(coef)
     intercept = np.mean(y - y_hat)
     return coef, intercept
