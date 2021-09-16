@@ -3,7 +3,6 @@ import time
 import datetime
 import os
 import pandas as pd
-from transprs.utils import tmp_extract
 
 
 def ldpred(
@@ -63,9 +62,9 @@ def ldpred(
     """
 
     start_time = time.time()
-    print("Extracting data...")
-    tmp_extract(processor)
-    print("Done extract data!")
+    # print("Extracting data...")
+    # tmp_extract(processor)
+    # print("Done extract data!")
     print("LDpred is running...")
 
     subprocess.call(
@@ -73,8 +72,8 @@ def ldpred(
             ldpred coord --gf %s --ssf %s --A1 %s --A2 %s --chr %s --pos %s --eff %s --rs %s --N %s --out %s
             """
         % (
-            "tmp",
-            "tmp_ss",
+            processor.population,
+            processor.sumstats,
             "A1",
             "A2",
             "CHR",
