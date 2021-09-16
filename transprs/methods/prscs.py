@@ -79,16 +79,20 @@ def prscs(
 
     df_adj_ss = df_adj_ss.reset_index(drop=True)
     final_snps = list(set(df_adj_ss[1]) & set(ss["SNP"]))
-    processor.adjusted_ss["PRScs"] = ss.copy()
-    processor.adjusted_ss["PRScs"] = processor.adjusted_ss["PRScs"][
-        processor.adjusted_ss["PRScs"].SNP.isin(final_snps)
-    ]
 
-    processor.adjusted_ss["PRScs"][use_col] = df_adj_ss[5].values
+    adjusted_ss = ss.copy()
+    adjusted_ss = adjusted_ss[adjusted_ss.SNP.isin(final_snps)]
+
+    adjusted_ss[use_col] = df_adj_ss[5].values
+
+    save_path = processor.workdir + "/adjusted_sumstats_prscs"
+    adjusted_ss.to_csv(save_path, sep="\t", index=False)
+
+    processor.adjusted_ss["PRScs"] = save_path
 
     processor.performance["PRScs"] = {}
 
-    print("The clumping result stores in .adjusted_ss['PRScs']!")
+    print("The PRScs result stores in .adjusted_ss['PRScs']!")
 
     subprocess.call(
         """
