@@ -7,9 +7,9 @@ import pandas as pd
 
 def ldpred(
     processor,
+    reference,
     use_col,
     N,
-    ldf,
     ldr,
     h2,
     fraction_causal,
@@ -72,7 +72,7 @@ def ldpred(
             ldpred coord --gf %s --ssf %s --A1 %s --A2 %s --chr %s --pos %s --eff %s --rs %s --N %s --out %s
             """
         % (
-            processor.population,
+            reference,
             processor.sumstats,
             "A1",
             "A2",

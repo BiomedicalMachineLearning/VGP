@@ -16,9 +16,6 @@ def prscsx(
     phi=1e-2,
 ):
     start_time = time.time()
-    print("Extracting data...")
-    tmp_extract(processors, use_col=use_col)
-    print("Done extract data!")
     print("PRScsx is running...")
 
     n_processors = len(processors)
