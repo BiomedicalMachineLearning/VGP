@@ -22,6 +22,7 @@ class DataProcessor(object):
         assert type(population) == DataArray, "Imputed snps is not an DataArray!"
 
         sumstats = pre_reader(sumstats)
+        sumstats = sumstats.dropna(axis=0)
         sumstats = sumstats.dropna(axis=1)
 
         self.sumstats = sumstats

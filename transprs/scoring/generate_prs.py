@@ -6,7 +6,7 @@ import datetime
 import glob
 
 
-def generate_prs(processor, method, target_pop, use_sum=True):
+def generate_prs(processor, method, use_sum=True):
 
     assert method in processor.adjusted_ss.keys(), (
         "Please run " + method + " before calculate PRS!"
@@ -40,7 +40,7 @@ def generate_prs(processor, method, target_pop, use_sum=True):
         """
             % (
                 processor.adjusted_ss[method],
-                target_pop,
+                processor.population,
                 processor.adjusted_ss[method],
                 str(effect_ind),
             ),
@@ -67,7 +67,7 @@ def generate_prs(processor, method, target_pop, use_sum=True):
         """
             % (
                 processor.adjusted_ss[method],
-                target_pop,
+                processor.population,
                 processor.adjusted_ss[method],
                 str(effect_ind),
             ),
