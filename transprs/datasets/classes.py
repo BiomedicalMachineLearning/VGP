@@ -249,7 +249,7 @@ class DataProcessor(object):
 
     def store_path(self):
         try:
-            os.mkdir("./workdir")
+            os.mkdir(self.workdir)
         except:
             pass
         self.sumstats.to_csv(
