@@ -1,3 +1,3 @@
 from .estimate_weighting import estimate_weighting
 from .estimate_weighting import estimate_weighting_multipop
-from .combine_methods import combine_methods
+from .combine_multipop import combine_methods
