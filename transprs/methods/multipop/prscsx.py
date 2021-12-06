@@ -23,9 +23,10 @@ def prscsx(
     subprocess.call(
         """
         for chr in {1..22}; do \
-            plink --bim tmp.bim --chr $chr --make-just-bim --out tmp${chr}; \
+            plink --bim %s.bim --chr $chr --make-just-bim --out tmp${chr}; \
         done
-    """,
+        """
+        % processors[0].population,
         shell=True,
     )
 
@@ -34,12 +35,16 @@ def prscsx(
 
     ss = ""
     for i in range(0, len(processors)):
-        ss = ss + ",./tmp" + str(i) + "_ss"
+        tmp = pd.read_table(processors[i].sumstats)
+        tmp[["SNP", "A1", "A2", "BETA", "P"]].to_csv(
+            "tmp_sumstat" + str(i), sep=" ", index=False
+        )
+        ss = ss + ",tmp_sumstat" + str(i)
     ss = ss[1:]
 
-    populations = ",".join(populations)
+    tmp_populations = ",".join(populations)
 
-    N = ",".join(map(str, N))
+    tmp_N = ",".join(map(str, N))
 
     outdir = "./tmp"
 
@@ -51,7 +56,8 @@ def prscsx(
         print("Applying PRScsx for CHR " + str(i) + "...")
         bim = "./tmp" + str(i)
         CHR = i
-        subprocess.call(
+
+        print(
             """
             python %s --ref_dir=%s --bim_prefix=%s --sst_file=%s --pop=%s --n_gwas=%s --chrom=%s --phi=%s --out_dir=%s --out_name=%s
             """
@@ -60,8 +66,25 @@ def prscsx(
                 ldref_dir,
                 bim,
                 ss,
-                populations,
-                N,
+                tmp_populations,
+                tmp_N,
+                str(CHR),
+                str(phi),
+                outdir,
+                outname,
+            ),
+        )
+        subprocess.call(
+            """
+            python %s --ref_dir=%s --bim_prefix=%s --sst_file=%s --pop=%s --n_gwas=%s --chrom=%s --phi=%s --out_dir=%s --out_name=%s
+             """
+            % (
+                prscsx_path,
+                ldref_dir,
+                bim,
+                ss,
+                tmp_populations,
+                tmp_N,
                 str(CHR),
                 str(phi),
                 outdir,
@@ -70,7 +93,7 @@ def prscsx(
             shell=True,
         )
 
-        for pop in populations.split(","):
+        for pop in populations:
             subprocess.call(
                 "mv tmp/tmp_%s_pst*chr%s.txt tmp/tmp_%s_pst_chr%s.txt"
                 % (pop, str(i), pop, str(i)),
@@ -80,7 +103,7 @@ def prscsx(
 
     print("Get adjusted_beta...")
 
-    for processor, pop in zip(processors, populations.split(",")):
+    for processor, pop in zip(processors, populations):
 
         df_adj_ss = pd.read_table("tmp/tmp_" + pop + "_pst_chr1.txt", header=None)
 
@@ -96,15 +119,20 @@ def prscsx(
                 pass
 
         df_adj_ss = df_adj_ss.reset_index(drop=True)
-        final_snps = list(set(df_adj_ss[1]) & set(processor.sumstats["SNP"]))
-        processor.adjusted_ss["PRScsx"] = processor.sumstats.copy()
-        processor.adjusted_ss["PRScsx"] = processor.adjusted_ss["PRScsx"][
-            processor.adjusted_ss["PRScsx"].SNP.isin(final_snps)
-        ]
+        sumstats = pd.read_table(processor.sumstats)
+        final_snps = list(set(df_adj_ss[1]) & set(sumstats["SNP"]))
 
-        processor.adjusted_ss["PRScsx"][use_col] = df_adj_ss[5].values
+        adjusted_ss = sumstats.copy()
+        adjusted_ss = adjusted_ss[adjusted_ss.SNP.isin(final_snps)]
 
-        processor.performance["PRScsx"] = {}
+        adjusted_ss[use_col] = df_adj_ss[5].values
+
+        save_path = processor.workdir + "/adjusted_sumstats_PRSCSx"
+        adjusted_ss.to_csv(save_path, sep="\t", index=False)
+
+        processor.adjusted_ss["PRSCSx"] = save_path
+
+        processor.performance["PRSCSx"] = {}
 
     print("The clumping result stores in .adjusted_ss['PRScsx']!")
 
