@@ -4,3 +4,4 @@ from .prscs import prscs
 from .ldpred import ldpred
 from .BayesR import BayesR
 from .SBayesR import SBayesR
+from . import multipop

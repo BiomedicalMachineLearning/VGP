@@ -24,6 +24,16 @@ def generate_prs(processor, method, use_sum=True):
             """
         awk '{print $3,$8}' %s > tmp_SNP.pvalue
 
+        echo "0.000000001 0 0.00000001" > tmp_range_list
+        echo "0.00000001 0 0.0000001" > tmp_range_list
+        echo "0.0000001 0 0.0000001" > tmp_range_list
+        echo "0.000003 0 0.000003" > tmp_range_list
+        echo "0.000001 0 0.000001" > tmp_range_list
+        echo "0.00003 0 0.00003" > tmp_range_list
+        echo "0.00001 0 0.00001" > tmp_range_list
+        echo "0.0003 0 0.0003" > tmp_range_list
+        echo "0.0001 0 0.0001" > tmp_range_list
+        echo "0.003 0 0.003" > tmp_range_list
         echo "0.001 0 0.001" > tmp_range_list
         echo "0.05 0 0.05" >> tmp_range_list
         echo "0.1 0 0.1" >> tmp_range_list
@@ -51,6 +61,16 @@ def generate_prs(processor, method, use_sum=True):
             """
         awk '{print $3,$8}' %s > tmp_SNP.pvalue
 
+        echo "0.000000001 0 0.00000001" > tmp_range_list
+        echo "0.00000001 0 0.0000001" > tmp_range_list
+        echo "0.0000001 0 0.0000001" > tmp_range_list
+        echo "0.000003 0 0.000003" > tmp_range_list
+        echo "0.000001 0 0.000001" > tmp_range_list
+        echo "0.00003 0 0.00003" > tmp_range_list
+        echo "0.00001 0 0.00001" > tmp_range_list
+        echo "0.0003 0 0.0003" > tmp_range_list
+        echo "0.0001 0 0.0001" > tmp_range_list
+        echo "0.003 0 0.003" > tmp_range_list
         echo "0.001 0 0.001" > tmp_range_list
         echo "0.05 0 0.05" >> tmp_range_list
         echo "0.1 0 0.1" >> tmp_range_list
