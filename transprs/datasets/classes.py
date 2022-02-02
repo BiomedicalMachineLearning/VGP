@@ -4,6 +4,7 @@ from xarray import DataArray
 from collections import OrderedDict
 from random import randrange
 from transprs.datasets.utils import pre_reader, complement
+from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 import subprocess
 from pandas_plink import write_plink1_bin
 import os
@@ -215,7 +216,7 @@ class DataProcessor(object):
 
         tmp_extract(self)
 
-        subprocess.call(
+        process_prune = Popen(
             """
         plink \
             --bfile tmp \
@@ -230,7 +231,17 @@ class DataProcessor(object):
         """
             % (str(n_components)),
             shell=True,
+            stdout=PIPE,
+            stderr=STDOUT,
         )
+
+        with process_prune.stdout:
+            try:
+                for line in iter(process_prune.stdout.readline, b""):
+                    print(line.decode("utf-8").strip())
+
+            except CalledProcessError as e:
+                print(f"{str(e)}")
 
         pca = pd.read_table("tmp.eigenvec", sep=" ", header=None)
 

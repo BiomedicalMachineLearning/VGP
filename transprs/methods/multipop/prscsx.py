@@ -1,4 +1,4 @@
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 import pandas as pd
 import time
 import datetime

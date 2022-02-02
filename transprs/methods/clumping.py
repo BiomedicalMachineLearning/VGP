@@ -1,5 +1,6 @@
 from transprs.utils import tmp_extract
 import subprocess
+from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 import time
 import datetime
 import pandas as pd
@@ -14,7 +15,7 @@ def clumping(
 
     start_time = time.time()
     print("Clumping is running...")
-    subprocess.call(
+    process_clumping = Popen(
         """
         plink \
             --bfile %s \
@@ -25,6 +26,9 @@ def clumping(
             --clump-snp-field SNP \
             --clump-field P \
             --out tmp_out
+
+
+        awk 'NR!=1{print $3}' tmp_out.clumped >  tmp_out.valid.snp
         """
         % (
             processor.population,
@@ -34,14 +38,17 @@ def clumping(
             processor.sumstats,
         ),
         shell=True,
+        stdout=PIPE,
+        stderr=STDOUT,
     )
 
-    subprocess.call(
-        """
-    awk 'NR!=1{print $3}' tmp_out.clumped >  tmp_out.valid.snp
-        """,
-        shell=True,
-    )
+    with process_clumping.stdout:
+        try:
+            for line in iter(process_clumping.stdout.readline, b""):
+                print(line.decode("utf-8").strip())
+
+        except CalledProcessError as e:
+            print(f"{str(e)}")
 
     print("Done clumping!")
     valid_snps = list(pd.read_table("tmp_out.valid.snp", header=None)[0])
