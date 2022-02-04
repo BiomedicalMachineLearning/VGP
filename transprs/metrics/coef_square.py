@@ -1,12 +1,12 @@
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import MinMaxScaler
-from transprs.metrics.utils import model_based_evaluation
+from transprs.metrics.utils import correlation_evaluation
 import numpy as np
 import pandas as pd
 
 
-def r2_score_evaluation(
+def coef_squared_evaluation(
     processor,
     method,
     trait_col,
@@ -37,22 +37,19 @@ def r2_score_evaluation(
             merged_df[[prs_col, trait_col]] = scaler.transform(
                 merged_df[[prs_col, trait_col]]
             )
-        score_list = model_based_evaluation(
+        score_list = correlation_evaluation(
             processor,
             merged_df,
             trait_col=trait_col,
-            model=LinearRegression(),
-            metric=r2_score,
             prs_col=prs_col,
             id_col=id_col,
-            use_pca=use_pca,
         )
-        results[pval] = score_list
+        results[pval] = score_list[0]
 
     # Get mean each fold
     mean_results = {}
     for key in results.keys():
-        mean_results[key] = np.mean(results[key])
+        mean_results[key] = results[key]
 
     # Get best p-value
     best_key = max(mean_results, key=mean_results.get)
@@ -73,10 +70,10 @@ def r2_score_evaluation(
         + "']"
     )
 
-    processor.performance[method]["r2_score"] = results[best_key]
+    processor.performance[method]["coef_square"] = results[best_key]
 
     print(
         "The best fit result is stored in processor.performance['"
         + method
-        + "']['r2_score']"
+        + "']['coef_square']"
     )

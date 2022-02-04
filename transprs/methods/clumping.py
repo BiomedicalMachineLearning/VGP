@@ -1,5 +1,6 @@
 from transprs.utils import tmp_extract
 import subprocess
+from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 import time
 import datetime
 import pandas as pd
@@ -13,38 +14,53 @@ def clumping(
 ):
 
     start_time = time.time()
-    print("Extracting data...")
-    tmp_extract(processor)
-    print("Done extract data!")
     print("Clumping is running...")
-    subprocess.call(
+    process_clumping = Popen(
         """
         plink \
-            --bfile tmp \
+            --bfile %s \
             --clump-p1 %s \
             --clump-r2 %s \
             --clump-kb %s \
-            --clump tmp_ss \
+            --clump %s \
             --clump-snp-field SNP \
             --clump-field P \
             --out tmp_out
+
+
+        awk 'NR!=1{print $3}' tmp_out.clumped >  tmp_out.valid.snp
         """
-        % (str(clump_p1), str(clump_r2), str(clump_kb)),
+        % (
+            processor.population,
+            str(clump_p1),
+            str(clump_r2),
+            str(clump_kb),
+            processor.sumstats,
+        ),
         shell=True,
+        stdout=PIPE,
+        stderr=STDOUT,
     )
 
-    subprocess.call(
-        """
-    awk 'NR!=1{print $3}' tmp_out.clumped >  tmp_out.valid.snp
-        """,
-        shell=True,
-    )
+    with process_clumping.stdout:
+        try:
+            for line in iter(process_clumping.stdout.readline, b""):
+                print(line.decode("utf-8").strip())
+
+        except CalledProcessError as e:
+            print(f"{str(e)}")
 
     print("Done clumping!")
     valid_snps = list(pd.read_table("tmp_out.valid.snp", header=None)[0])
-    processor.adjusted_ss["clumping"] = processor.sumstats[
-        processor.sumstats.SNP.isin(valid_snps)
-    ]
+
+    sumstats = pd.read_table(processor.sumstats)
+
+    adjusted_ss = sumstats[sumstats.SNP.isin(valid_snps)]
+
+    save_path = processor.workdir + "/adjusted_sumstats_clumping"
+    adjusted_ss.to_csv(save_path, sep="\t", index=False)
+
+    processor.adjusted_ss["clumping"] = save_path
 
     processor.performance["clumping"] = {}
 

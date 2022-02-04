@@ -1,5 +1,4 @@
-from transprs.methods.multipop.prscsx_utils import tmp_extract
-import subprocess
+from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 import pandas as pd
 import time
 import datetime
@@ -15,79 +14,129 @@ def prscsx(
     N,
     phi=1e-2,
 ):
+
+    # Set time
     start_time = time.time()
-    print("Extracting data...")
-    tmp_extract(processors, use_col=use_col)
-    print("Done extract data!")
     print("PRScsx is running...")
 
+    # Check number of data object
     n_processors = len(processors)
 
-    subprocess.call(
+    # Get number of chr
+    CHR = pd.read_table(processors[0].sumstats).CHR.unique().astype(str)
+    CHR_input = ",".join(CHR)
+
+    # Split genotype to each chr
+    process_split = Popen(
         """
-        for chr in {1..22}; do \
-            plink --bim tmp.bim --chr $chr --make-just-bim --out tmp${chr}; \
+        for chr in %s; do \
+            plink --bim %s.bim --chr $chr --make-just-bim --out tmp${chr}; \
         done
-    """,
+        """
+        % (CHR_input, processors[0].population),
         shell=True,
+        stdout=PIPE,
+        stderr=STDOUT,
     )
 
+    with process_split.stdout:
+        try:
+            for line in iter(process_split.stdout.readline, b""):
+                print(line.decode("utf-8").strip())
+
+        except CalledProcessError as e:
+            print(f"{str(e)}")
+
+    # Track method source code
     path = os.path.dirname(transprs.__file__)
     prscsx_path = path + "/methods/multipop/prscsx/PRScsx.py"
 
+    # Store temporary sumstats for each data object to prepare input
+    # for PRSCSx
     ss = ""
     for i in range(0, len(processors)):
-        ss = ss + ",./tmp" + str(i) + "_ss"
+        tmp = pd.read_table(processors[i].sumstats)
+        tmp[["SNP", "A1", "A2", "BETA", "P"]].to_csv(
+            "tmp_sumstat" + str(i), sep=" ", index=False
+        )
+        ss = ss + ",tmp_sumstat" + str(i)
     ss = ss[1:]
 
-    populations = ",".join(populations)
+    # Prepare population names
+    tmp_populations = ",".join(populations)
 
-    N = ",".join(map(str, N))
+    # Prepare N samples
+    tmp_N = ",".join(map(str, N))
 
+    # Prepare output folder
     outdir = "./tmp"
 
     outname = "tmp"
 
-    subprocess.call("mkdir tmp", shell=True)
+    Popen("mkdir tmp", shell=True)
 
-    for i in range(1, 23):
+    # Apply PRSCSx script for each chr
+    for i in CHR:
         print("Applying PRScsx for CHR " + str(i) + "...")
         bim = "./tmp" + str(i)
-        CHR = i
-        subprocess.call(
+        CHR_no = i
+
+        # Main run
+        process_run = Popen(
             """
             python %s --ref_dir=%s --bim_prefix=%s --sst_file=%s --pop=%s --n_gwas=%s --chrom=%s --phi=%s --out_dir=%s --out_name=%s
-            """
+             """
             % (
                 prscsx_path,
                 ldref_dir,
                 bim,
                 ss,
-                populations,
-                N,
-                str(CHR),
+                tmp_populations,
+                tmp_N,
+                str(CHR_no),
                 str(phi),
                 outdir,
                 outname,
             ),
             shell=True,
+            stdout=PIPE,
+            stderr=STDOUT,
         )
 
-        for pop in populations.split(","):
-            subprocess.call(
+        with process_run.stdout:
+            try:
+                for line in iter(process_run.stdout.readline, b""):
+                    print(line.decode("utf-8").strip())
+
+            except CalledProcessError as e:
+                print(f"{str(e)}")
+
+        # Moving the result to tmp output dir
+        for pop in populations:
+            process_move = Popen(
                 "mv tmp/tmp_%s_pst*chr%s.txt tmp/tmp_%s_pst_chr%s.txt"
                 % (pop, str(i), pop, str(i)),
                 shell=True,
+                stdout=PIPE,
+                stderr=STDOUT,
             )
+            with process_move.stdout:
+                try:
+                    for line in iter(process_move.stdout.readline, b""):
+                        print(line.decode("utf-8").strip())
+
+                except CalledProcessError as e:
+                    print(f"{str(e)}")
+
         print("PRScsx for CHR " + str(i) + " is done!")
 
     print("Get adjusted_beta...")
 
-    for processor, pop in zip(processors, populations.split(",")):
+    for processor, pop in zip(processors, populations):
 
-        df_adj_ss = pd.read_table("tmp/tmp_" + pop + "_pst_chr1.txt", header=None)
+        df_adj_ss = pd.DataFrame(columns=[0, 1, 2, 3, 4, 5])
 
-        for i in range(2, 23):
+        for i in CHR:
             try:
                 df_next = pd.read_table(
                     "tmp/tmp_" + pop + "_pst_chr" + str(i) + ".txt", header=None
@@ -99,21 +148,31 @@ def prscsx(
                 pass
 
         df_adj_ss = df_adj_ss.reset_index(drop=True)
-        final_snps = list(set(df_adj_ss[1]) & set(processor.sumstats["SNP"]))
-        processor.adjusted_ss["PRScsx"] = processor.sumstats.copy()
-        processor.adjusted_ss["PRScsx"] = processor.adjusted_ss["PRScsx"][
-            processor.adjusted_ss["PRScsx"].SNP.isin(final_snps)
+        sumstats = pd.read_table(processor.sumstats)
+        final_snps = list(set(df_adj_ss[1]) & set(sumstats["SNP"]))
+
+        adjusted_ss = sumstats.copy()
+        adjusted_ss = adjusted_ss[adjusted_ss.SNP.isin(final_snps)]
+
+        df_adj_ss.columns = ["0", "SNP", "2", "3", "4", "5"]
+        adjusted_ss = pd.merge(adjusted_ss, df_adj_ss)[
+            ["CHR", "BP", "SNP", "A1", "A2", "N", "SE", "P", "5"]
         ]
+        adjusted_ss.columns = ["CHR", "BP", "SNP", "A1", "A2", "N", "SE", "P", "BETA"]
 
-        processor.adjusted_ss["PRScsx"][use_col] = df_adj_ss[5].values
+        save_path = processor.workdir + "/adjusted_sumstats_PRSCSx"
+        adjusted_ss.to_csv(save_path, sep="\t", index=False)
 
-        processor.performance["PRScsx"] = {}
+        processor.adjusted_ss["PRSCSx"] = save_path
+
+        processor.performance["PRSCSx"] = {}
 
     print("The clumping result stores in .adjusted_ss['PRScsx']!")
 
     subprocess.call(
         """
     rm ./tmp*
+    rm ./tmp/*
         """,
         shell=True,
     )

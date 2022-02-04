@@ -1,5 +1,6 @@
 from scipy.optimize import nnls
 import numpy as np
+from sklearn.linear_model import LinearRegression
 
 
 def nonneg_lstsq(X, y):
@@ -13,3 +14,12 @@ def nonneg_lstsq(X, y):
     y_hat = X.dot(coef)
     intercept = np.mean(y - y_hat)
     return coef, intercept
+
+
+def ols(X, y):
+    reg_nnls = LinearRegression()
+    reg_nnls.fit(X, y)
+
+    print(reg_nnls.coef_)
+
+    return reg_nnls.coef_, reg_nnls.intercept_

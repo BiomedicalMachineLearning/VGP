@@ -52,3 +52,15 @@ def model_based_evaluation(
             score_list.append(metric(Y_test, Y_pred))
 
     return score_list
+
+
+def correlation_evaluation(processor, merged_df, trait_col, prs_col, id_col="FID"):
+    score_list = []
+
+    from scipy.stats import pearsonr
+
+    R2 = pearsonr(list(merged_df[prs_col]), list(merged_df[trait_col]))[0] ** 2
+
+    score_list.append(R2)
+
+    return score_list
