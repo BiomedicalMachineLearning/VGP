@@ -100,23 +100,23 @@ def polyfun(
                 f.write("%s\n" % item)
 
     print("Finemapping is running. It takes a while...")
-    # process_run_finemap = Popen(
-    #     """
-    #     bash %s/jobs.txt
-    # """
-    #     % (poly_dir),
-    #     shell=True,
-    #     stdout=PIPE,
-    #     stderr=STDOUT,
-    # )
+    process_run_finemap = Popen(
+        """
+        bash %s/jobs.txt
+    """
+        % (poly_dir),
+        shell=True,
+        stdout=PIPE,
+        stderr=STDOUT,
+    )
 
-    # with process_run_finemap.stdout:
-    #     try:
-    #         for line in iter(process_run_finemap.stdout.readline, b""):
-    #             print(line.decode("utf-8").strip())
+    with process_run_finemap.stdout:
+        try:
+            for line in iter(process_run_finemap.stdout.readline, b""):
+                print(line.decode("utf-8").strip())
 
-    #     except CalledProcessError as e:
-    #         print(f"{str(e)}")
+        except CalledProcessError as e:
+            print(f"{str(e)}")
 
     process_aggregate = Popen(
         """
