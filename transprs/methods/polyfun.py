@@ -6,7 +6,7 @@ import os
 import transprs
 
 
-def polypred(
+def polyfun(
     processor,
     use_col,
     ldref_dir,
@@ -14,16 +14,46 @@ def polypred(
     phi=1e-2,
 ):
     start_time = time.time()
-    # print("Extracting data...")
-    # tmp_extract(processor, use_col=use_col)
-    # print("Done extract data!")
-    print("PolyPred is running...")
+    print("PolyFun is running...")
+
+    # Track method source code
+    path = os.path.dirname(transprs.__file__)
+    prscsx_path = path + "/methods/polypred/munge_polyfun_sumstats.py"
 
     subprocess.call(
         """
-        for chr in {21..22}; do \
-            plink --bim %s.bim --chr $chr --make-just-bim --out tmp${chr}; \
-        done
+        python %s \
+            --sumstats %s \
+            --out %s
+    """
+        % (processor.population,),
+        shell=True,
+    )
+
+    subprocess.call(
+        """
+        python ../polyfun/create_finemapper_jobs.py \
+            --sumstats ./polyfun_output/sumstats.munged.parquet_tmp  \
+            --n 300000 \
+            --method susie \
+            --non-funct \
+            --max-num-causal 2 \
+            --out-prefix ./polyfun_output \
+            --jobs-file ./polyfun_output/jobs.txt
+
+        bash ./polyfun_output/jobs.txt
+    """
+        % (processor.population,),
+        shell=True,
+    )
+
+    subprocess.call(
+        """
+        python ../polyfun/aggregate_finemapper_results.py \
+            --out-prefix polyfun_output/output/polyfun_output \
+            --sumstats ./polyfun_output/sumstats.munged.parquet_tmp \
+            --out ./polyfun_output/polyfun_output.agg.txt.gz \
+         --allow-missing-jobs
     """
         % (processor.population,),
         shell=True,
