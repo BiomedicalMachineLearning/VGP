@@ -1,128 +1,148 @@
-import subprocess
+from subprocess import Popen, PIPE, STDOUT, CalledProcessError
 import pandas as pd
 import time
 import datetime
 import os
 import transprs
-
+import pandas as pd
 
 def polyfun(
     processor,
-    use_col,
-    ldref_dir,
-    N,
-    phi=1e-2,
+    N=None,
+    use_col="BETA",
+    ref_dir= None,
+    max_num_causal=2,
 ):
     start_time = time.time()
     print("PolyFun is running...")
 
     # Track method source code
     path = os.path.dirname(transprs.__file__)
-    prscsx_path = path + "/methods/polypred/munge_polyfun_sumstats.py"
+    polypred_path = path + "/methods/polypred"
 
-    subprocess.call(
+    poly_dir = processor.workdir + "/polyfun/"
+
+    sumstat_file = poly_dir + "sumstats.munged.parquet"
+    N = pd.read_table(processor.sumstats).N[0]
+
+    try:
+        os.mkdir(poly_dir)
+    except:
+        print(poly_dir + "is already created")
+        pass
+
+    process_munge = Popen(
         """
-        python %s \
+        python %s/munge_polyfun_sumstats.py \
             --sumstats %s \
             --out %s
     """
-        % (processor.population,),
+        % (polypred_path,processor.sumstats,sumstat_file ),
         shell=True,
+        stdout=PIPE,
+        stderr=STDOUT,
     )
+    with process_munge.stdout:
+        try:
+            for line in iter(process_munge.stdout.readline, b""):
+                print(line.decode("utf-8").strip())
 
-    subprocess.call(
+        except CalledProcessError as e:
+            print(f"{str(e)}")
+
+
+
+    process_finemap = Popen(
+            """
+            python %s/create_finemapper_jobs.py \
+                --sumstats %s  \
+                --n %s \
+                --method susie \
+                --non-funct \
+                --max-num-causal %s \
+                --allow-missing \
+                --jobs-file %s/jobs.txt \
+                --out-prefix %s/polyfun_output
         """
-        python ../polyfun/create_finemapper_jobs.py \
-            --sumstats ./polyfun_output/sumstats.munged.parquet_tmp  \
-            --n 300000 \
-            --method susie \
-            --non-funct \
-            --max-num-causal 2 \
-            --out-prefix ./polyfun_output \
-            --jobs-file ./polyfun_output/jobs.txt
-
-        bash ./polyfun_output/jobs.txt
-    """
-        % (processor.population,),
-        shell=True,
-    )
-
-    subprocess.call(
-        """
-        python ../polyfun/aggregate_finemapper_results.py \
-            --out-prefix polyfun_output/output/polyfun_output \
-            --sumstats ./polyfun_output/sumstats.munged.parquet_tmp \
-            --out ./polyfun_output/polyfun_output.agg.txt.gz \
-         --allow-missing-jobs
-    """
-        % (processor.population,),
-        shell=True,
-    )
-
-    path = os.path.dirname(transprs.__file__)
-    prscs_path = path + "/methods/prscs/PRScs.py"
-
-    outdir = "tmp"
-
-    try:
-        os.mkdir(outdir)
-    except:
-        pass
-
-    ss = pd.read_table(processor.sumstats)
-    ss[["SNP", "A1", "A2", use_col, "P"]].to_csv("tmp_ss", sep="\t", index=False)
-
-    for i in range(21, 23):
-        print("Applying PRScs for CHR " + str(i) + "...")
-        bim = "./tmp" + str(i)
-        CHR = i
-        subprocess.call(
-            "python %s --ref_dir=%s --bim_prefix=%s --sst_file=%s --n_gwas=%s --chrom=%s --phi=%s --out_dir=%s"
-            % (
-                prscs_path,
-                ldref_dir,
-                bim,
-                "tmp_ss",
-                str(N),
-                str(CHR),
-                str(phi),
-                outdir,
-            ),
+            % (polypred_path,sumstat_file,str(N),str(max_num_causal),poly_dir,poly_dir),
             shell=True,
+            stdout=PIPE,
+            stderr=STDOUT,
         )
 
-        subprocess.call(
-            "mv tmp_pst*chr%s.txt tmp_pst_chr%s.txt" % (str(i), str(i)), shell=True
+    with process_finemap.stdout:
+        try:
+            for line in iter(process_finemap.stdout.readline, b""):
+                print(line.decode("utf-8").strip())
+
+        except CalledProcessError as e:
+            print(f"{str(e)}")
+            
+    if ref_dir != None:
+        tmp = pd.read_table(poly_dir + '/jobs.txt',header=None).values
+        jobs = list(map(lambda x: x[0].replace("https://data.broadinstitute.org/alkesgroup/UKBB_LD/",ref_dir),tmp))
+
+        with open(poly_dir + '/jobs.txt', 'w') as f:
+            for item in jobs:
+                f.write("%s\n" % item)
+
+    print("Finemapping is running. It takes a while...")
+    # process_run_finemap = Popen(
+    #     """
+    #     bash %s/jobs.txt
+    # """
+    #     % (poly_dir),
+    #     shell=True,
+    #     stdout=PIPE,
+    #     stderr=STDOUT,
+    # )
+
+    # with process_run_finemap.stdout:
+    #     try:
+    #         for line in iter(process_run_finemap.stdout.readline, b""):
+    #             print(line.decode("utf-8").strip())
+
+    #     except CalledProcessError as e:
+    #         print(f"{str(e)}")
+
+
+    process_aggregate = Popen(
+            """
+            python %s/aggregate_finemapper_results.py \
+                --out-prefix %s/polyfun_output \
+                --sumstats %s \
+                --out %s/polyfun_output.agg.txt.gz \
+                --allow-missing-jobs
+        """
+            % (polypred_path,poly_dir,sumstat_file,poly_dir),
+            shell=True,
+            stdout=PIPE,
+            stderr=STDOUT,
         )
-        print("PRScs for CHR " + str(i) + " is done!")
+
+    with process_aggregate.stdout:
+        try:
+            for line in iter(process_aggregate.stdout.readline, b""):
+                print(line.decode("utf-8").strip())
+
+        except CalledProcessError as e:
+            print(f"{str(e)}")
 
     print("Get adjusted_beta...")
+    tmp = pd.read_table(poly_dir + "/polyfun_output.agg.txt.gz")
+    ss = pd.read_table(processor.sumstats)
+    adjusted_ss = pd.merge(tmp,ss,on="SNP")[["CHR_x","BP_x","SNP","A1_x","A2_x","N_x","SE","P_y","BETA_MEAN"]]
+    adjusted_ss.columns = ss.columns
+    
 
-    df_adj_ss = pd.read_table("./tmp_pst_chr21.txt", header=None)
-
-    for i in range(22, 23):
-        try:
-            df_next = pd.read_table("./tmp_pst_chr" + str(i) + ".txt", header=None)
-            df_adj_ss = pd.concat([df_adj_ss.reset_index(drop=True), df_next], axis=0)
-        except:
-            pass
-
-    df_adj_ss = df_adj_ss.reset_index(drop=True)
-    final_snps = list(set(df_adj_ss[1]) & set(ss["SNP"]))
-
-    adjusted_ss = ss.copy()
-    adjusted_ss = adjusted_ss[adjusted_ss.SNP.isin(final_snps)]
-
-    adjusted_ss[use_col] = df_adj_ss[5].values
-
-    save_path = processor.workdir + "/adjusted_sumstats_prscs"
+    save_path = processor.workdir + "/adjusted_sumstats_polyfun"
     adjusted_ss.to_csv(save_path, sep="\t", index=False)
 
-    processor.adjusted_ss["PRScs"] = save_path
+    processor.adjusted_ss["polyfun"] = save_path
 
-    processor.performance["PRScs"] = {}
+    processor.performance["polyfun"] = {}
 
-    print("The PRScs result stores in .adjusted_ss['PRScs']!")
+    print("The polyfun result stores in .adjusted_ss['polyfun']!")
 
     subprocess.call(
         """
