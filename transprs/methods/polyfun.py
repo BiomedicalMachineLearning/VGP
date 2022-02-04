@@ -6,11 +6,12 @@ import os
 import transprs
 import pandas as pd
 
+
 def polyfun(
     processor,
     N=None,
     use_col="BETA",
-    ref_dir= None,
+    ref_dir=None,
     max_num_causal=2,
 ):
     start_time = time.time()
@@ -37,7 +38,7 @@ def polyfun(
             --sumstats %s \
             --out %s
     """
-        % (polypred_path,processor.sumstats,sumstat_file ),
+        % (polypred_path, processor.sumstats, sumstat_file),
         shell=True,
         stdout=PIPE,
         stderr=STDOUT,
@@ -50,10 +51,8 @@ def polyfun(
         except CalledProcessError as e:
             print(f"{str(e)}")
 
-
-
     process_finemap = Popen(
-            """
+        """
             python %s/create_finemapper_jobs.py \
                 --sumstats %s  \
                 --n %s \
@@ -64,11 +63,18 @@ def polyfun(
                 --jobs-file %s/jobs.txt \
                 --out-prefix %s/polyfun_output
         """
-            % (polypred_path,sumstat_file,str(N),str(max_num_causal),poly_dir,poly_dir),
-            shell=True,
-            stdout=PIPE,
-            stderr=STDOUT,
-        )
+        % (
+            polypred_path,
+            sumstat_file,
+            str(N),
+            str(max_num_causal),
+            poly_dir,
+            poly_dir,
+        ),
+        shell=True,
+        stdout=PIPE,
+        stderr=STDOUT,
+    )
 
     with process_finemap.stdout:
         try:
@@ -77,12 +83,19 @@ def polyfun(
 
         except CalledProcessError as e:
             print(f"{str(e)}")
-            
-    if ref_dir != None:
-        tmp = pd.read_table(poly_dir + '/jobs.txt',header=None).values
-        jobs = list(map(lambda x: x[0].replace("https://data.broadinstitute.org/alkesgroup/UKBB_LD/",ref_dir),tmp))
 
-        with open(poly_dir + '/jobs.txt', 'w') as f:
+    if ref_dir != None:
+        tmp = pd.read_table(poly_dir + "/jobs.txt", header=None).values
+        jobs = list(
+            map(
+                lambda x: x[0].replace(
+                    "https://data.broadinstitute.org/alkesgroup/UKBB_LD/", ref_dir
+                ),
+                tmp,
+            )
+        )
+
+        with open(poly_dir + "/jobs.txt", "w") as f:
             for item in jobs:
                 f.write("%s\n" % item)
 
@@ -105,20 +118,19 @@ def polyfun(
     #     except CalledProcessError as e:
     #         print(f"{str(e)}")
 
-
     process_aggregate = Popen(
-            """
+        """
             python %s/aggregate_finemapper_results.py \
                 --out-prefix %s/polyfun_output \
                 --sumstats %s \
                 --out %s/polyfun_output.agg.txt.gz \
                 --allow-missing-jobs
         """
-            % (polypred_path,poly_dir,sumstat_file,poly_dir),
-            shell=True,
-            stdout=PIPE,
-            stderr=STDOUT,
-        )
+        % (polypred_path, poly_dir, sumstat_file, poly_dir),
+        shell=True,
+        stdout=PIPE,
+        stderr=STDOUT,
+    )
 
     with process_aggregate.stdout:
         try:
@@ -131,9 +143,10 @@ def polyfun(
     print("Get adjusted_beta...")
     tmp = pd.read_table(poly_dir + "/polyfun_output.agg.txt.gz")
     ss = pd.read_table(processor.sumstats)
-    adjusted_ss = pd.merge(tmp,ss,on="SNP")[["CHR_x","BP_x","SNP","A1_x","A2_x","N_x","SE","P_y","BETA_MEAN"]]
+    adjusted_ss = pd.merge(tmp, ss, on="SNP")[
+        ["CHR_x", "BP_x", "SNP", "A1_x", "A2_x", "N_x", "SE", "P_y", "BETA_MEAN"]
+    ]
     adjusted_ss.columns = ss.columns
-    
 
     save_path = processor.workdir + "/adjusted_sumstats_polyfun"
     adjusted_ss.to_csv(save_path, sep="\t", index=False)
