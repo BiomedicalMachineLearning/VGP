@@ -4,7 +4,6 @@ import time
 import datetime
 import os
 import transprs
-import pandas as pd
 
 
 def polyfun(
@@ -144,7 +143,7 @@ def polyfun(
     tmp = pd.read_table(poly_dir + "/polyfun_output.agg.txt.gz")
     ss = pd.read_table(processor.sumstats)
     adjusted_ss = pd.merge(tmp, ss, on="SNP")[
-        ["CHR_x", "BP_x", "SNP", "A1_x", "A2_x", "N_x", "SE", "P_y", "BETA_MEAN"]
+        ["CHR_x", "BP_x", "SNP", "A1_x", "A2_x", "N_x", "SE", "P_y", "BETA_MEAN", "FRQ"]
     ]
     adjusted_ss.columns = ss.columns
 
@@ -152,6 +151,8 @@ def polyfun(
     adjusted_ss.to_csv(save_path, sep="\t", index=False)
 
     processor.adjusted_ss["polyfun"] = save_path
+
+    processor.tuning["polyfun"] = {}
 
     processor.performance["polyfun"] = {}
 
