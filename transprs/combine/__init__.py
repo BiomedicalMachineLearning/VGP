@@ -1,4 +1,4 @@
 from .estimate_weighting import estimate_weighting
-from .estimate_weighting import estimate_weighting_multipop
+from .estimate_weighting import estimate_weighting_multipop, weighting_prs_multipop
 from .combine_methods import combine_multipop
-from . import multipop
+from .combine_methods import combine_prs_multipop

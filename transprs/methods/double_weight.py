@@ -44,6 +44,8 @@ def double_weight(processor, top_choice=100000):
 
     processor.adjusted_ss["double_weight"] = save_path
 
+    processor.tuning["double_weight"] = {}
+
     processor.performance["double_weight"] = {}
 
     print("The double weight result stores in .adjusted_ss['double_weight']!")

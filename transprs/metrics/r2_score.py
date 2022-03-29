@@ -41,7 +41,7 @@ def r2_score_evaluation(
             processor,
             merged_df,
             trait_col=trait_col,
-            model=LinearRegression(),
+            model=LinearRegression(positive=True),
             metric=r2_score,
             prs_col=prs_col,
             id_col=id_col,

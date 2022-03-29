@@ -1,6 +1,5 @@
 import transprs as tprs
-from transprs.combine import multipop
-
+import itertools
 
 def Combine_inpop_methods(
     processor, methods, model, prs_col, trait_col, use_col, metric="r2_score"
@@ -22,7 +21,6 @@ def Combine_inpop_methods(
             key_ss="+".join(subset),
             use_col=use_col,
             prs_col=prs_col,
-            model=model,
         )
         tprs.scoring.generate_prs(processor, method="+".join(subset))
 
@@ -30,37 +28,42 @@ def Combine_inpop_methods(
             tprs.metrics.r2_score_evaluation(
                 processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
             )
-        elif metric == "coef_square":
+        elif metric == "coef_squared":
             tprs.metrics.coef_squared_evaluation(
                 processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
             )
 
 
 def Combine_multipop_methods(
-    processors, methods, model, prs_col, trait_col, use_col, metric="r2_score"
+    processors, methods, prs_col, trait_col, use_col, metric="r2_score"
 ):
 
-    subsets = []
-    for L in range(0, len(methods)):
-        for H in range(0, len(methods)):
-            subsets.append([methods[L], methods[H]])
-
+    subsets = list(itertools.product(*[methods]*len(processors)))
+    
+    new_subsets = []
     for subset in subsets:
-        multipop.combine_multipop(
-            [processor, processor2],
+        track = 0
+        for i,method in enumerate(list(subset)):
+            if method in processors[i].adjusted_ss.keys():
+                track += 1
+        if track == len(processors):
+            new_subsets.append(subset)
+    for subset in new_subsets:
+        tprs.combine.combine_prs_multipop(
+            processors,
             methods=subset,
             trait_col=trait_col,
             prs_col=prs_col,
             key_ss="+".join(subset),
             use_col=use_col,
         )
-        tprs.scoring.generate_prs(processor, method="+".join(subset))
+        # tprs.scoring.generate_prs(processors[0], method="+".join(subset))
 
         if metric == "r2_score":
             tprs.metrics.r2_score_evaluation(
-                processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
+                processors[0], method="+".join(subset), trait_col=trait_col, prs_col=prs_col, validate=False
             )
-        elif metric == "coef_square":
+        elif metric == "coef_squared":
             tprs.metrics.coef_squared_evaluation(
-                processor, method="+".join(subset), trait_col=trait_col, prs_col=prs_col
+                processors[0], method="+".join(subset), trait_col=trait_col, prs_col=prs_col, validate=False
             )

@@ -56,6 +56,8 @@ def lassosum(
 
     processor.adjusted_ss["lassosum"] = save_path
 
+    processor.tuning["lassosum"] = {}
+
     processor.performance["lassosum"] = {}
 
     print("The double weight result stores in .adjusted_ss['lassosum']!")

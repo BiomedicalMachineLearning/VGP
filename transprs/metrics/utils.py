@@ -1,4 +1,6 @@
 import numpy as np
+import warnings
+warnings.filterwarnings("ignore")
 
 
 def model_based_evaluation(
@@ -54,12 +56,27 @@ def model_based_evaluation(
     return score_list
 
 
-def correlation_evaluation(processor, merged_df, trait_col, prs_col, id_col="FID"):
+
+
+def correlation_evaluation(processor, merged_df, trait_col, prs_col, id_col="FID", use_pca=True):
+    from sklearn.linear_model import LinearRegression
+    from sklearn.metrics import r2_score
+
     score_list = []
+    model = LinearRegression()
 
-    from scipy.stats import pearsonr
+    if use_pca:
+        train_df = merged_df[[prs_col] + [i for i in merged_df.columns if "PC" in i]].values
 
-    R2 = pearsonr(list(merged_df[prs_col]), list(merged_df[trait_col]))[0] ** 2
+        model.fit(train_df, merged_df[trait_col])
+        Y_pred = model.predict(train_df)
+    else:
+        model.fit(merged_df[prs_col].values.reshape(-1, 1), merged_df[trait_col])
+        Y_pred = model.predict(merged_df[prs_col].values.reshape(-1, 1))
+    
+    R2 = r2_score(merged_df[trait_col], Y_pred)
+
+    
 
     score_list.append(R2)
 

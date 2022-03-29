@@ -1,4 +1,5 @@
 from subprocess import Popen, PIPE, STDOUT, CalledProcessError
+import subprocess
 import pandas as pd
 import time
 import datetime
@@ -33,7 +34,7 @@ def prscsx(
             plink --bim %s.bim --chr $chr --make-just-bim --out tmp${chr}; \
         done
         """
-        % (CHR_input, processors[0].population),
+        % (CHR_input, processors[0].validation),
         shell=True,
         stdout=PIPE,
         stderr=STDOUT,
@@ -160,12 +161,14 @@ def prscsx(
         ]
         adjusted_ss.columns = ["CHR", "BP", "SNP", "A1", "A2", "N", "SE", "P", "BETA"]
 
-        save_path = processor.workdir + "/adjusted_sumstats_PRSCSx"
+        save_path = processor.workdir + "/adjusted_sumstats_PRScsx"
         adjusted_ss.to_csv(save_path, sep="\t", index=False)
 
-        processor.adjusted_ss["PRSCSx"] = save_path
+        processor.adjusted_ss["PRScsx"] = save_path
 
-        processor.performance["PRSCSx"] = {}
+        processor.tuning["PRScsx"] = {}
+
+        processor.performance["PRScsx"] = {}
 
     print("The clumping result stores in .adjusted_ss['PRScsx']!")
 
