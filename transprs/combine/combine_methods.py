@@ -1,16 +1,11 @@
 from transprs.combine import estimate_weighting
+from transprs.combine import estimate_weighting_multipop, weighting_prs_multipop
 import numpy as np
 import pandas as pd
 import time
 import datetime
 import subprocess
 
-
-from transprs.combine import estimate_weighting_multipop
-import numpy as np
-import time
-import datetime
-import subprocess
 
 
 def combine_multipop(
@@ -28,6 +23,7 @@ def combine_multipop(
     print("Estimating mixing weights...")
 
     # Calculate mixing weight
+
     mixing_weight = estimate_weighting_multipop(
         processors, methods, trait_col, model, prs_col
     )
@@ -88,8 +84,6 @@ def combine_multipop(
 
     adjusted_ss[name_combine] = pd.concat(betas_df).sort_values(["CHR", "BP", "A1"])
 
-    print(adjusted_ss[name_combine])
-
     save_path = processor.workdir + "/adjusted_sumstats_" + name_combine
     adjusted_ss[name_combine].to_csv(save_path, sep="\t", index=False)
 
@@ -99,6 +93,44 @@ def combine_multipop(
 
     processors[0].performance[name_combine] = {}
 
+    print(
+        "--- Done in %s ---"
+        % (str(datetime.timedelta(seconds=round(time.time() - start_time))))
+    )
+
+
+def combine_prs_multipop(
+    processors,
+    methods,
+    trait_col,
+    key_ss,
+    use_col,
+    prs_col="SCORESUM",
+):
+    start_time = time.time()
+    print("Estimating mixing weights...")
+    
+    # Calculate mixing weight
+
+    adjusted_prs = weighting_prs_multipop(
+        processors, methods, trait_col, prs_col
+    )
+    
+    
+    if key_ss != None:
+        name_combine = key_ss
+    else:
+        name_combine = "+".join(methods)
+        
+    processors[0].prs_test[name_combine] = {}
+    processors[0].prs_test[name_combine]["combine"] = processors[0].prs_test[methods[0]]["best_fit"].copy()
+    processors[0].prs_test[name_combine]["combine"][prs_col] = adjusted_prs
+    
+    processors[0].performance[name_combine] = {}
+    
+    print("The " + name_combine + " result stores in .prs_test['" + name_combine + "']!")
+    
+    
     print(
         "--- Done in %s ---"
         % (str(datetime.timedelta(seconds=round(time.time() - start_time))))

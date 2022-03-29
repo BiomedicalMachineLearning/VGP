@@ -31,7 +31,7 @@ def clumping(
         awk 'NR!=1{print $3}' tmp_out.clumped >  tmp_out.valid.snp
         """
         % (
-            processor.population,
+            processor.validation,
             str(clump_p1),
             str(clump_r2),
             str(clump_kb),
@@ -61,6 +61,8 @@ def clumping(
     adjusted_ss.to_csv(save_path, sep="\t", index=False)
 
     processor.adjusted_ss["clumping"] = save_path
+
+    processor.tuning["clumping"] = {}
 
     processor.performance["clumping"] = {}
 

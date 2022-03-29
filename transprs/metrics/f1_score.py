@@ -1,12 +1,12 @@
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import f1_score
 from sklearn.preprocessing import MinMaxScaler
 from transprs.metrics.utils import model_based_evaluation
 import numpy as np
 import pandas as pd
 
 
-def r2_score_evaluation(
+def f1_score_evaluation(
     processor,
     method,
     trait_col,
@@ -41,8 +41,8 @@ def r2_score_evaluation(
             processor,
             merged_df,
             trait_col=trait_col,
-            model=LinearRegression(positive=True),
-            metric=r2_score,
+            model=LogisticRegression(),
+            metric=f1_score,
             prs_col=prs_col,
             id_col=id_col,
             use_pca=use_pca,
@@ -73,10 +73,10 @@ def r2_score_evaluation(
         + "']"
     )
 
-    processor.performance[method]["r2_score"] = results[best_key]
+    processor.performance[method]["f1_score"] = results[best_key]
 
     print(
         "The best fit result is stored in processor.performance['"
         + method
-        + "']['r2_score']"
+        + "']['f1_score']"
     )

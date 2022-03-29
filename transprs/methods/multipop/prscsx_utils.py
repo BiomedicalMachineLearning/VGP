@@ -10,4 +10,4 @@ def tmp_extract(processors, use_col):
             "tmp" + str(i) + "_ss", sep="\t", index=False
         )
 
-    write_plink1_bin(processors[0].population, "tmp.bim", verbose=False)
+    write_plink1_bin(processors[0].validation, "tmp.bim", verbose=False)

@@ -6,11 +6,11 @@ import pandas as pd
 import numpy as np
 import transprs as tprs
 
-def SBayesR(
+
+def SBayesS(
     processor,
     ldm,
-    pi = [0.95,0.02,0.02,0.01],
-    gamma = [0.0,0.01,0.1,1],
+    pi = 0.05,
     out_freq = 100,
     chain_length=1000,
     burnin=100,
@@ -18,26 +18,35 @@ def SBayesR(
     threads=1,
 ):
     """
-    SBayesR method
+    BayesR
 
     Args:
-        ldm (str): LD sparse matrix
-        pi (str): pi, separated by ","
-        gamma (str): pi, separated by ","
-        sumstat (str): GWAS summary statistics
+        bfile_ref (str): genotype of reference sample
+        pheno (str): phenotype of reference sample
+        pi (float): pi
         h2 (float): heritability
-        out (str): outputfile
         mcmc_niter (int, optional): number of MCMC iterations. Defaults to 1000.
-        burnin (int, optional): number of burnin iterations. Defaults to 100.
-        random_state (int, optional): random state. Defaults to 1.
-        threads (int, optional): number of threads to run. Defaults to 1.
+        burnin (int, optional): number of MCMC burnins. Defaults to 50.
+        out (str, optional): output. Defaults to "bayesR_out".
+
+    Example:
+
+        bfile_ref = 'popEUR_SAS_merged_train'
+        bfile_target = 'popEUR_SAS_merged_test'
+        pheno = 'pheno_train_scaled.txt'
+        pi = 0.1
+        h2 = 0.5
+        mcmc_niter = 1000
+        burnin = 50
+        out = "bayesR_out"
     """
 
+    start_time = time.time()
     path = os.path.dirname(tprs.__file__)
     gctb_path = path + "/software/gctb"
 
     start_time = time.time()
-    print("SBayesR is running...")
+    print("SBayesS is running...")
 
     ss = pd.read_table(processor.sumstats)
     tmp = ss[["SNP","A1","A2","FRQ","BETA","SE","P","N"]]
@@ -45,9 +54,8 @@ def SBayesR(
 
     process_main = Popen(
         """
-            %s --sbayes R --mldm %s \
+            %s --sbayes S --mldm %s \
                 --pi %s \
-                --gamma %s \
                 --gwas-summary tmp.cojo \
                 --chain-length %s \
                 --burn-in %s \
@@ -58,8 +66,7 @@ def SBayesR(
         % (
             gctb_path,
             ldm,
-            ",".join(np.array(pi).astype(str)),
-            ",".join(np.array(gamma).astype(str)),
+            str(pi),
             str(chain_length),
             str(burnin),
             str(out_freq)
@@ -76,24 +83,24 @@ def SBayesR(
 
         except CalledProcessError as e:
             print(f"{str(e)}")
-
-    sbayesR_result = pd.read_table("tmp_result.snpRes",sep="\s+")
-    sbayesR_result = sbayesR_result[["Name","A1Effect"]]
-    sbayesR_result.columns = ["SNP","BETA"]
-    adjusted_ss = pd.merge(ss,sbayesR_result,on="SNP")[['CHR', 'BP', 'SNP', 'A1', 'A2', 'N', 'SE', 'P', 'BETA_y', 'FRQ']]
+    
+    sbayesS_result = pd.read_table("tmp_result.snpRes",sep="\s+")
+    sbayesS_result = sbayesS_result[["Name","A1Effect"]]
+    sbayesS_result.columns = ["SNP","BETA"]
+    adjusted_ss = pd.merge(ss,sbayesS_result,on="SNP")[['CHR', 'BP', 'SNP', 'A1', 'A2', 'N', 'SE', 'P', 'BETA_y', 'FRQ']]
     adjusted_ss.columns = ['CHR', 'BP', 'SNP', 'A1', 'A2', 'N', 'SE', 'P', 'BETA', 'FRQ']
-    save_path = processor.workdir + "/adjusted_sumstats_SBayesR"
+    save_path = processor.workdir + "/adjusted_sumstats_SBayesS"
 
     # Saving result
     adjusted_ss.to_csv(save_path, sep="\t", index=False)
 
-    processor.adjusted_ss["SBayesR"] = save_path
+    processor.adjusted_ss["SBayesS"] = save_path
 
-    processor.tuning["SBayesR"] = {}
-    
-    processor.performance["SBayesR"] = {}
+    processor.tuning["SBayesS"] = {}
 
-    print("The SBayesR result stores in .adjusted_ss['SBayesR']!")
+    processor.performance["SBayesS"] = {}
+
+    print("The SBayesS result stores in .adjusted_ss['SBayesS']!")
 
     call(
         """
@@ -101,9 +108,10 @@ def SBayesR(
         """,
         shell=True,
     )
-    
+
 
     print(
         "--- Done in %s ---"
         % (str(datetime.timedelta(seconds=round(time.time() - start_time))))
     )
+
