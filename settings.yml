@@ -1,50 +1,103 @@
-workdir: ["workdir_ukbb", "workdir_vn"]
+GENERAL_SETTING:
+    inputs:
+        test_prefix: ["VN_data_samples/seed_0/test_data_VN"]
+        validation_prefix: ["VN_data_samples/seed_0/val_data_VN"]
+        phenotype_test: ["VN_data_samples/seed_0/test.phenotype"]
+        phenotype_validation: ["VN_data_samples/seed_0/validation.phenotype"]
+        trait_col: "Height"
+        prs_method: "SCORESUM"
+        run_populations: ["UK","VN","JP"] # Choose which one to run
+        output_folder: "./"
+        
+    metrics: "coef_squared"
+    visualization:
+        bar_plot: 
+            figsize: (20, 15)
+            cmap: "Dark2"
+        box_plot:
+            figsize: (20, 15)
+            cmap: "Dark2"
+UK:
+    workdir: "workdir_ukbb"
 
-inputs:
-    list_sumstats: ["ukbb_sumstats.parquet", "VN_data_samples/seed_0/VN_train_sumstats.ss"] # List all sumstats. The first one is the main one
-    finemap_ss: ["ukbb_sumstats.parquet"] # Set the sumstats to use finemapping. Currently support only polyfun
-    test_prefix: "VN_data_samples/seed_0/test_data_VN"
-    validation_prefix: "VN_data_samples/seed_0/val_data_VN"
-    phenotype_test: "VN_data_samples/seed_0/test.phenotype"
-    phenotype_validation: "VN_data_samples/seed_0/validation.phenotype"
-    trait_col: "Height"
-    prs_method: "SCORESUM"
+    inputs:
+        sumstats: "ukbb_sumstats.parquet"
+        methods: ["clumping"]
+        
+    preprocessing:
+        n_components: 6
 
-preprocessing:
-    n_components: 6
+    methods:
+        clumping: 
+            clump_p1: 1
+            clump_r2: 0.5
+            clump_kb: 250
+        double_weight:
+            top_choice: 100000
+        polyfun:
+            N: None
+            ref_dir: None
+            max_num_causal: 2
+        prscs:
+            ldref_dir: "LD_REF PATH"
+            N: 200000
+            phi: 0.001
+        prscsx: # Only work with multiple sumstats
+            ldref_dir: "LD_REF PATH"
+            N: 200000
+            phi: 0.001
+        ldpred2:
+            ldref_path: "LD_REF PATH"
+            map_file: "MAP FILE PATH"
+        SBayesR:
+            ldm: "LD_REF PATH"
+            pi: [0.95,0.02,0.02,0.01]
+            gamma: [0.0,0.01,0.1,1]
+            out_freq: 100
+            chain_length: 1000
+            burnin: 100
+        SBayesS:
+            ldm: "LD_REF PATH"
+            pi: 0.05
+            out_freq: 100
+            chain_length: 1000
+            burnin: 100
+VN:
+    workdir: "VN_data_samples/seed_0/workdir_vn"
 
-methods:
-    clumping: 
-        clump_p1: 1
-        clump_r2: 0.5
-        clump_kb: 250
-    double_weight:
-        top_choice: 100000
-    # polyfun:
-    #     N: None
-    #     use_col: "BETA"
-    #     ref_dir: None
-    #     max_num_causal: 2
-    # prscs:
-    #     use_col: "BETA"
-    #     ldref_dir: "LD_REF PATH"
-    #     N: 200000
-    #     phi: 0.001
-    # prscsx: # Only work with multiple sumstats
-    #     use_col: "BETA"
-    #     ldref_dir: "LD_REF PATH"
-    #     N: 200000
-    #     phi: 0.001
+    inputs:
+        sumstats: "VN_data_samples/seed_0/VN_train_sumstats.ss"
+        methods: ["clumping"]
+        
+    preprocessing:
+        n_components: 6
 
-metrics:
-    - coef_squared # Only for continous phenotype
-    # - f1_score # Only for descrete phenotype
-    # - auc_roc # Only for descrete phenotype
+    methods:
+        clumping: 
+            clump_p1: 1
+            clump_r2: 0.5
+            clump_kb: 250
+        double_weight:
+            top_choice: 100000
+    
+JP:
+    workdir: "workdir_jpn"
 
-visualization:
-    bar_plot: 
-        figsize: (20, 15)
-        cmap: "Dark2"
+    inputs:
+        sumstats: "JPN_height_sumstat.ss"
+        methods: ["clumping"]
+        
+    preprocessing:
+        n_components: 6
+
+    methods:
+        clumping: 
+            clump_p1: 1
+            clump_r2: 0.5
+            clump_kb: 250
+        double_weight:
+            top_choice: 100000
+    
 
 
 
