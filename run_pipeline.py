@@ -3,6 +3,77 @@ import yaml
 import transprs as tprs
 import pandas as pd
 
+def run_clumping(processor, population, settings):
+    params = settings[population]["methods"]["clumping"]
+    tprs.methods.clumping(processor,
+                             clump_p1=float(params["clump_p1"]),
+                             clump_r2=float(params["clump_r2"]),
+                             clump_kb=float(params["clump_kb"]))
+    
+    tprs.scoring.generate_prs(processor,method="clumping")
+    
+    if settings["GENERAL_SETTING"]["metrics"] == "coef_squared":
+        tprs.metrics.coef_squared_evaluation(processor,
+                                                 method="clumping",
+                                                 trait_col=settings["GENERAL_SETTING"]["inputs"]["trait_col"], 
+                                                 prs_col=settings["GENERAL_SETTING"]["inputs"]["prs_method"])
+                                   
+    tprs.scoring.generate_prs(processor,method="clumping",validate=False)
+                                   
+    if settings["GENERAL_SETTING"]["metrics"] == "coef_squared":
+        tprs.metrics.coef_squared_evaluation(processor,
+                                                 method="clumping",
+                                                 trait_col=settings["GENERAL_SETTING"]["inputs"]["trait_col"], 
+                                                 prs_col=settings["GENERAL_SETTING"]["inputs"]["prs_method"],
+                                                 validate=False)
+        
+def run_double_weight(processor, population, settings):
+    params = settings[population]["methods"]["double_weight"]
+    tprs.methods.double_weight(processor,
+                             top_choice=int(params["top_choice"]))
+    
+    tprs.scoring.generate_prs(processor,method="double_weight")
+    
+    if settings["GENERAL_SETTING"]["metrics"] == "coef_squared":
+        tprs.metrics.coef_squared_evaluation(processor,
+                                                 method="double_weight",
+                                                 trait_col=settings["GENERAL_SETTING"]["inputs"]["trait_col"], 
+                                                 prs_col=settings["GENERAL_SETTING"]["inputs"]["prs_method"])
+                                   
+    tprs.scoring.generate_prs(processor,method="double_weight",validate=False)
+                                   
+    if settings["GENERAL_SETTING"]["metrics"] == "coef_squared":
+        tprs.metrics.coef_squared_evaluation(processor,
+                                                 method="double_weight",
+                                                 trait_col=settings["GENERAL_SETTING"]["inputs"]["trait_col"], 
+                                                 prs_col=settings["GENERAL_SETTING"]["inputs"]["prs_method"],
+                                                 validate=False)
+        
+def run_pipeline(population,index, settings):
+    processor = tprs.read_input(prefix_test=settings["GENERAL_SETTING"]["inputs"]["test_prefix"][index],
+                    prefix_validation=settings["GENERAL_SETTING"]["inputs"]["validation_prefix"][index],
+                    sumstats_path=settings[population]["inputs"]["sumstats"],
+                    workdir=settings[population]["workdir"])
+    phenotype = pd.read_table(settings["GENERAL_SETTING"]["inputs"]["phenotype_test"][index],sep="\s+")
+    # phenotype.Height = np.random.randint(2, size=len(phenotype)).astype(str)
+    processor.add_phenotype(processor.test, phenotype=phenotype)
+    
+    phenotype_val = pd.read_table(settings["GENERAL_SETTING"]["inputs"]["phenotype_validation"][index],sep="\s+")
+    processor.add_phenotype(processor.validation, phenotype=phenotype_val) 
+    
+    tprs.Preprocessing(processor, 
+                       n_components=int(settings[population]["preprocessing"]["n_components"])
+                      )
+    for method in settings["GENERAL_SETTING"]["inputs"]["methods"]:
+        if method == "clumping":
+            run_clumping(processor,population,settings)
+        if method == "double_weight":
+            run_double_weight(processor,population,settings)
+    return processor
+        
+    
+                    
+        
 def main():
 
     # Load settings
@@ -13,19 +84,15 @@ def main():
         except yaml.YAMLError as exc:
             print(exc)
     
-    # Check general format
-    assert set(settings.keys()).issubset(['inputs', 
-                                        'methods', 
-                                        'metrics', 
-                                        'visualization',
-                                        'workdir',
-                                        'preprocessing']), "Wrong format of .yml setting files!"
+    populations = settings["GENERAL_SETTING"]["inputs"]["run_populations"]
+    
+    assert set(populations).issubset(settings.keys()), "Please check `run_populations` in the settings file again!"
     
     # Check inputs
     list_headers = []
-    for x in settings["inputs"]["list_sumstats"]:
-        list_headers.append(pd.read_table(x, index_col=0, nrows=0).columns.tolist())
-        
+    for x in populations:
+        list_headers.append(pd.read_table(settings[x]["inputs"]["sumstats"], index_col=0, nrows=0,sep="\s+").columns.tolist())
+
     for header in list_headers:
         assert set(header).issubset(["CHR",
                                     "BP",
@@ -38,100 +105,18 @@ def main():
                                     "OR",
                                     "BETA",
                                     "INFO",
-                                    "FRQ"]), "Wrong format of sumstats!"
+                                    "FRQ","MAF"]), "Wrong format of sumstats!"
 
-    processors = []
-    pre_params = settings["preprocessing"]
-
-    for i, ss in enumerate(settings["inputs"]["list_sumstats"]):
-        processor = tprs.read_input(prefix_bed=settings["inputs"]["genotype_prefix"], 
-                            sumstats_path=ss,
-                            workdir=settings["workdir"][i])
-        phenotype = pd.read_table(settings["inputs"]["phenotype"],sep=" ")
-        # phenotype.Height = np.random.randint(2, size=len(phenotype)).astype(str)
-        processor.add_phenotype(phenotype)
+   
+    all_processors = []
+    for population in populations:
+        processor = run_pipeline(population,index=0,settings=settings)
+        all_processors.append(processor)
         
-        tprs.Preprocessing(processor, 
-                        n_components=int(pre_params["n_components"]), 
-                        k_folds=int(pre_params["k_folds"]), 
-                        n_repeats=int(pre_params["n_repeats"]))
-        
-        processors.append(processor)
+    import _pickle as cPickle
+    with open(r"%s/all_processors.pickle" % settings["GENERAL_SETTING"]["inputs"]["output_folder"], "wb") as output_file:
+        cPickle.dump(all_processors, output_file)
 
-    if "clumping" in settings["methods"].keys():
-        # Run the method PRS method: clumping
-        for processor in processors:
-            params = settings["methods"]["clumping"]
-            tprs.methods.clumping(processor,
-                                clump_p1=float(params["clump_p1"]),
-                                clump_r2=float(params["clump_r2"]),
-                                clump_kb=float(params["clump_kb"]))
-            
-            tprs.scoring.generate_prs(processor,method="clumping")
-            
-            if "coef_squared" in settings["metrics"]:
-                tprs.metrics.coef_squared_evaluation(processor,
-                                                    method="clumping",
-                                                    trait_col=settings["inputs"]["trait_col"], 
-                                                    prs_col=settings["inputs"]["prs_method"])
-    
-    if "double_weight" in settings["methods"].keys():
-        # Run the method PRS method: clumping
-        for processor in processors:
-            params = settings["methods"]["double_weight"]
-            tprs.methods.double_weight(processor,
-                                top_choice=int(params["top_choice"]))
-            
-            tprs.scoring.generate_prs(processor,method="double_weight")
-            
-            if "coef_squared" in settings["metrics"]:
-                tprs.metrics.coef_squared_evaluation(processor,
-                                                    method="double_weight",
-                                                    trait_col=settings["inputs"]["trait_col"], 
-                                                    prs_col=settings["inputs"]["prs_method"])
-    
-    if len(processors) >= 2:
-    
-        if "coef_squared" in settings["metrics"]:
-            tprs.Combine_multipop_methods(processors, methods=list(settings["methods"].keys()),
-                                        trait_col=settings["inputs"]["trait_col"], 
-                                        prs_col=settings["inputs"]["prs_method"],
-                                        use_col="BETA",
-                                        model="nnls",
-                                        metric="coef_squared")
-    
-    # Transfer data to main processor
-
-    for i, processor in enumerate(processors[1:]):
-        for method in list(processor.adjusted_ss.keys()):
-            new_name = method + "_" + str(i + 1)
-            processor.adjusted_ss[new_name] = processor.adjusted_ss[method]
-            processor.prs_results[new_name] = processor.prs_results[method]
-            processor.performance[new_name] = processor.performance[method]
-            del processor.adjusted_ss[method]
-            del processor.prs_results[method]
-            del processor.performance[method]
-
-    for processor in processors[1:]:
-        processors[0].adjusted_ss = {**processors[0].adjusted_ss, **processor.adjusted_ss}
-        processors[0].prs_results = {**processors[0].prs_results, **processor.prs_results}
-        processors[0].performance = {**processors[0].performance, **processor.performance}
-
-    tprs.Generate_PRS(processors[0], methods=list(processors[0].adjusted_ss.keys()))
-    
-    if "coef_squared" in settings["metrics"]:
-        tprs.Inner_evaluate(processors[0], methods=list(processors[0].adjusted_ss.keys()),
-                trait_col=settings["inputs"]["trait_col"], 
-                prs_col=settings["inputs"]["prs_method"],
-                metric="coef_squared")
-
-        if "box_plot" in settings["visualization"].keys():
-            tprs.visualization.visualize_performance(processors[0], 
-                                                    metric="coef_squared",
-                                                    plot_type="box_plot",
-                                                    figsize=eval(settings["visualization"]["box_plot"]["figsize"]),
-                                                    fname=processors[0].workdir + "/coef_squared_evaluation_" + "box_plot" + ".png"
-                                                    )
 
     print("======================================================")
     print("The pipeline is done!")
