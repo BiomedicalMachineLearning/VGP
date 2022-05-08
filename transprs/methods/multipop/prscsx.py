@@ -25,7 +25,7 @@ def prscsx(
 
     # Get number of chr
     CHR = pd.read_table(processors[0].sumstats).CHR.unique().astype(str)
-    CHR_input = ",".join(CHR)
+    CHR_input = " ".join(CHR)
 
     # Split genotype to each chr
     process_split = Popen(
