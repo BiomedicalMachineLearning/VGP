@@ -49,21 +49,25 @@ def Combine_multipop_methods(
         if track == len(processors):
             new_subsets.append(subset)
     for subset in new_subsets:
+        new_subset = []
+        for i, method in enumerate(subset):
+            new_subset.append(method + str(i))
+
         tprs.combine.combine_prs_multipop(
             processors,
             methods=subset,
             trait_col=trait_col,
             prs_col=prs_col,
-            key_ss="+".join(subset),
+            key_ss="+".join(new_subset),
             use_col=use_col,
         )
         # tprs.scoring.generate_prs(processors[0], method="+".join(subset))
 
         if metric == "r2_score":
             tprs.metrics.r2_score_evaluation(
-                processors[0], method="+".join(subset), trait_col=trait_col, prs_col=prs_col, validate=False
+                processors[0], method="+".join(new_subset), trait_col=trait_col, prs_col=prs_col, validate=False
             )
         elif metric == "coef_squared":
             tprs.metrics.coef_squared_evaluation(
-                processors[0], method="+".join(subset), trait_col=trait_col, prs_col=prs_col, validate=False
+                processors[0], method="+".join(new_subset), trait_col=trait_col, prs_col=prs_col, validate=False
             )
