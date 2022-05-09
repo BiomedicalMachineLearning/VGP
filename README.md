@@ -15,6 +15,12 @@ I recommend to use conda to setup the environment
 conda env create -f environment.yml
 ```
 
+Besides, it's required to install R packages for LDpred2 and PolyFun/PolyPred. In R console:
+
+```
+install.packages(c("bigsnpr","susieR"))
+```
+
 ### Tutorials
 
 - Multiple populations for transfer PRS: [Link](https://github.com/BiomedicalMachineLearning/VGP/blob/main/Multiple_population_tutorial.ipynb)
