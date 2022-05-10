@@ -1,11 +1,17 @@
 # Basic tutorial to run the framework
 
-### Prepare dataset
+### Prepare code and dataset
+- Clone the github repository:
 
-You need to download from this ggdrive link:
-- data.zip: [https://drive.google.com/file/d/1HGFyQDnCKoGZEjXudEShVub3iS_DqpYd/view?usp=sharing](https://drive.google.com/file/d/1HGFyQDnCKoGZEjXudEShVub3iS_DqpYd/view?usp=sharing)
+ ```
+ git clone https://github.com/BiomedicalMachineLearning/VGP.git
+ ```
 
-Unzip the data.zip file and put into the `tutorials` folder 
+- You need to download from this ggdrive link
+
+data.zip: [https://drive.google.com/file/d/1HGFyQDnCKoGZEjXudEShVub3iS_DqpYd/view?usp=sharing](https://drive.google.com/file/d/1HGFyQDnCKoGZEjXudEShVub3iS_DqpYd/view?usp=sharing)
+
+Unzip the data.zip file and put the folder `data` into the `tutorials` folder 
 
 ### Install the requirements
 
@@ -22,5 +28,7 @@ install.packages(c("bigsnpr","susieR"))
 ```
 
 ### Tutorials
+
+
 
 - Multiple populations for transfer PRS: [Link](https://github.com/BiomedicalMachineLearning/VGP/blob/main/Multiple_population_tutorial.ipynb)
