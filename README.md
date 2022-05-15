@@ -1,4 +1,10 @@
-# Basic tutorial to run the framework
+# Scalable TransPRS framework to run the trasfer PRS from large population to under-representative population
+
+<p align="center">
+  <img src="https://i.ibb.co/brvQX90/run-pipeline-1.png"
+    alt="deepreg_logo" title="DeepReg" width="600"/>
+</p>
+
 
 ### Prepare dataset
 
