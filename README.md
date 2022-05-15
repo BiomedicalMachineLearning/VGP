@@ -18,6 +18,8 @@ Unzip the data.zip file and put into the `tutorials` folder
 I recommend to use conda to setup the environment
 
 ```
+git clone https://github.com/BiomedicalMachineLearning/VGP.git
+cd VGP
 conda env create -f environment.yml
 ```
 
