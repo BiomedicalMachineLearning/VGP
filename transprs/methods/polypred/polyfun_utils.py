@@ -27,9 +27,6 @@ class TqdmUpTo(tqdm):
         self.update(b * bsize - self.n)
 
 
-""" Logger class (for compatability with LDSC code)"""
-
-
 class Logger(object):
     def __init__(self):
         pass
