@@ -15,7 +15,7 @@ def prscs(
     phi=1e-2,
 ):
     start_time = time.time()
-    
+
     print("PRScs is running...")
 
     # Get number of chr
@@ -42,7 +42,6 @@ def prscs(
 
         except CalledProcessError as e:
             print(f"{str(e)}")
-
 
     path = os.path.dirname(transprs.__file__)
     prscs_path = path + "/methods/prscs/PRScs.py"
@@ -79,7 +78,7 @@ def prscs(
                 str(N),
                 str(CHR_no),
                 str(phi),
-                outdir+outname,
+                outdir + outname,
             ),
             shell=True,
             stdout=PIPE,
@@ -96,8 +95,7 @@ def prscs(
 
         # Moving the result to tmp output dir
         process_move = Popen(
-            "mv tmp/tmp_pst*chr%s.txt tmp/tmp_pst_chr%s.txt"
-            % (str(i),str(i)),
+            "mv tmp/tmp_pst*chr%s.txt tmp/tmp_pst_chr%s.txt" % (str(i), str(i)),
             shell=True,
             stdout=PIPE,
             stderr=STDOUT,
@@ -112,18 +110,13 @@ def prscs(
 
         print("PRScs for CHR " + str(i) + " is done!")
 
-
     print("Get adjusted_beta...")
 
     df_adj_ss = pd.DataFrame(columns=[0, 1, 2, 3, 4, 5])
     for i in CHR:
         try:
-            df_next = pd.read_table(
-                "tmp/tmp_pst_chr" + str(i) + ".txt", header=None
-            )
-            df_adj_ss = pd.concat(
-                [df_adj_ss.reset_index(drop=True), df_next], axis=0
-            )
+            df_next = pd.read_table("tmp/tmp_pst_chr" + str(i) + ".txt", header=None)
+            df_adj_ss = pd.concat([df_adj_ss.reset_index(drop=True), df_next], axis=0)
         except:
             pass
 

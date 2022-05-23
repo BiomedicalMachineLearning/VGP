@@ -31,8 +31,6 @@ def coef_squared_evaluation(
     except:
         pass
 
-    
-
     # Do repeated k-fold
     results = {}
     for pval in prs_results[method].keys():
@@ -50,7 +48,7 @@ def coef_squared_evaluation(
             trait_col=trait_col,
             prs_col=prs_col,
             id_col=id_col,
-            use_pca=use_pca
+            use_pca=use_pca,
         )
         results[pval] = score_list[0]
 
@@ -64,12 +62,9 @@ def coef_squared_evaluation(
 
     print("The best fit p-value is " + best_key)
 
-    prs_results[method][best_fit_key] = prs_results[method][
-        best_key
-    ]
+    prs_results[method][best_fit_key] = prs_results[method][best_key]
 
     prs_results[method][optimal_pval_key] = best_key
-
 
     if validate:
 
@@ -102,7 +97,3 @@ def coef_squared_evaluation(
             + method
             + "']['coef_squared']"
         )
-
-    
-
-    

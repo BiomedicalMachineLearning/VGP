@@ -151,7 +151,6 @@ def generate_prs(processor, method, use_sum=True, validate=True):
 
     print("PRS is generated!")
 
-    
     snp_results_files = glob.glob("./*.profile")
     import re
 
