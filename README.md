@@ -1,21 +1,34 @@
-# Basic tutorial to run the framework
+# Scalable TransPRS framework to run the trasfer PRS from large population to under-representative population
+
+<p align="center">
+  <img src="https://i.ibb.co/brvQX90/run-pipeline-1.png"
+    alt="deepreg_logo" title="DeepReg" width="600"/>
+</p>
+
 
 ### Prepare dataset
 
-You need to download from these ggdrive links:
-- Base data: [https://drive.google.com/file/d/1RWjk49QNZj9zvJHc9X_wyZ51fdy6xQjv/view](https://drive.google.com/file/d/1RWjk49QNZj9zvJHc9X_wyZ51fdy6xQjv/view)
-- Target data: [https://drive.google.com/file/d/1uhJR_3sn7RA8U5iYQbcmTp6vFdQiF4F2/view](https://drive.google.com/file/d/1uhJR_3sn7RA8U5iYQbcmTp6vFdQiF4F2/view)
+You need to download from this ggdrive link:
+- data.zip: [https://drive.google.com/file/d/1ZsbfabvwnssMiji6ECDieg1C7mJNhvYm/view?usp=sharing](https://drive.google.com/file/d/1ZsbfabvwnssMiji6ECDieg1C7mJNhvYm/view?usp=sharing)
 
-Only uncompress the Target data (EUR.zip)
+Unzip the data.zip file and put into the `tutorials` folder 
 
 ### Install the requirements
 
 I recommend to use conda to setup the environment
 
 ```
+git clone https://github.com/BiomedicalMachineLearning/VGP.git
+cd VGP
 conda env create -f environment.yml
+```
+
+Besides, it's required to install R packages for LDpred2 and PolyFun/PolyPred. In R console:
+
+```
+install.packages(c("bigsnpr","susieR"))
 ```
 
 ### Tutorials
 
-Please check it the `tutorials` folder.
+- Multiple populations for transfer PRS: [Link](https://github.com/BiomedicalMachineLearning/VGP/blob/main/Multiple_population_tutorial.ipynb)
