@@ -7,7 +7,6 @@ import datetime
 import subprocess
 
 
-
 def combine_multipop(
     processors,
     methods,
@@ -109,28 +108,28 @@ def combine_prs_multipop(
 ):
     start_time = time.time()
     print("Estimating mixing weights...")
-    
+
     # Calculate mixing weight
 
-    adjusted_prs = weighting_prs_multipop(
-        processors, methods, trait_col, prs_col
-    )
-    
-    
+    adjusted_prs = weighting_prs_multipop(processors, methods, trait_col, prs_col)
+
     if key_ss != None:
         name_combine = key_ss
     else:
         name_combine = "+".join(methods)
-        
+
     processors[0].prs_test[name_combine] = {}
-    processors[0].prs_test[name_combine]["combine"] = processors[0].prs_test[methods[0]]["best_fit"].copy()
+    processors[0].prs_test[name_combine]["combine"] = (
+        processors[0].prs_test[methods[0]]["best_fit"].copy()
+    )
     processors[0].prs_test[name_combine]["combine"][prs_col] = adjusted_prs
-    
+
     processors[0].performance[name_combine] = {}
-    
-    print("The " + name_combine + " result stores in .prs_test['" + name_combine + "']!")
-    
-    
+
+    print(
+        "The " + name_combine + " result stores in .prs_test['" + name_combine + "']!"
+    )
+
     print(
         "--- Done in %s ---"
         % (str(datetime.timedelta(seconds=round(time.time() - start_time))))

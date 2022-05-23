@@ -10,8 +10,8 @@ import transprs as tprs
 def SBayesS(
     processor,
     ldm,
-    pi = 0.05,
-    out_freq = 100,
+    pi=0.05,
+    out_freq=100,
     chain_length=1000,
     burnin=100,
     random_state=1,
@@ -49,8 +49,8 @@ def SBayesS(
     print("SBayesS is running...")
 
     ss = pd.read_table(processor.sumstats)
-    tmp = ss[["SNP","A1","A2","FRQ","BETA","SE","P","N"]]
-    tmp.to_csv("tmp.cojo", sep="\t",index=False)
+    tmp = ss[["SNP", "A1", "A2", "FRQ", "BETA", "SE", "P", "N"]]
+    tmp.to_csv("tmp.cojo", sep="\t", index=False)
 
     process_main = Popen(
         """
@@ -63,14 +63,7 @@ def SBayesS(
                 --out-freq %s \
                 --out tmp_result
         """
-        % (
-            gctb_path,
-            ldm,
-            str(pi),
-            str(chain_length),
-            str(burnin),
-            str(out_freq)
-        ),
+        % (gctb_path, ldm, str(pi), str(chain_length), str(burnin), str(out_freq)),
         shell=True,
         stdout=PIPE,
         stderr=STDOUT,
@@ -83,12 +76,25 @@ def SBayesS(
 
         except CalledProcessError as e:
             print(f"{str(e)}")
-    
-    sbayesS_result = pd.read_table("tmp_result.snpRes",sep="\s+")
-    sbayesS_result = sbayesS_result[["Name","A1Effect"]]
-    sbayesS_result.columns = ["SNP","BETA"]
-    adjusted_ss = pd.merge(ss,sbayesS_result,on="SNP")[['CHR', 'BP', 'SNP', 'A1', 'A2', 'N', 'SE', 'P', 'BETA_y', 'FRQ']]
-    adjusted_ss.columns = ['CHR', 'BP', 'SNP', 'A1', 'A2', 'N', 'SE', 'P', 'BETA', 'FRQ']
+
+    sbayesS_result = pd.read_table("tmp_result.snpRes", sep="\s+")
+    sbayesS_result = sbayesS_result[["Name", "A1Effect"]]
+    sbayesS_result.columns = ["SNP", "BETA"]
+    adjusted_ss = pd.merge(ss, sbayesS_result, on="SNP")[
+        ["CHR", "BP", "SNP", "A1", "A2", "N", "SE", "P", "BETA_y", "FRQ"]
+    ]
+    adjusted_ss.columns = [
+        "CHR",
+        "BP",
+        "SNP",
+        "A1",
+        "A2",
+        "N",
+        "SE",
+        "P",
+        "BETA",
+        "FRQ",
+    ]
     save_path = processor.workdir + "/adjusted_sumstats_SBayesS"
 
     # Saving result
@@ -109,9 +115,7 @@ def SBayesS(
         shell=True,
     )
 
-
     print(
         "--- Done in %s ---"
         % (str(datetime.timedelta(seconds=round(time.time() - start_time))))
     )
-

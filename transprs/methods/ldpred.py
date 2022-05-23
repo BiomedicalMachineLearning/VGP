@@ -67,25 +67,25 @@ def ldpred(
     print("LDpred is running...")
 
     process_coord = Popen(
-            """
+        """
                 ldpred coord --gf %s --ssf %s --A1 %s --A2 %s --chr %s --pos %s --eff %s --rs %s --N %s --out %s
                 """
-            % (
-                reference,
-                processor.sumstats,
-                "A1",
-                "A2",
-                "CHR",
-                "BP",
-                use_col,
-                "SNP",
-                str(N),
-                "tmp_ldcoord",
-            ),
-            shell=True,
-            stdout=PIPE,
-            stderr=STDOUT,
-        )
+        % (
+            reference,
+            processor.sumstats,
+            "A1",
+            "A2",
+            "CHR",
+            "BP",
+            use_col,
+            "SNP",
+            str(N),
+            "tmp_ldcoord",
+        ),
+        shell=True,
+        stdout=PIPE,
+        stderr=STDOUT,
+    )
 
     with process_coord.stdout:
         try:
@@ -96,23 +96,23 @@ def ldpred(
             print(f"{str(e)}")
 
     process_gibbs = Popen(
-            """
+        """
                 ldpred gibbs --cf %s --ldr %s --ldf %s --h2 %s --n-iter %s --n-burn-in %s --f %s --out %s
                 """
-            % (
-                "tmp_ldcoord",
-                ldr,
-                ldf,
-                h2,
-                gibbs_niter,
-                burnin,
-                fraction_causal,
-                "tmp_ldgibbs_out",
-            ),
-            shell=True,
-            stdout=PIPE,
-            stderr=STDOUT
-        )
+        % (
+            "tmp_ldcoord",
+            ldr,
+            ldf,
+            h2,
+            gibbs_niter,
+            burnin,
+            fraction_causal,
+            "tmp_ldgibbs_out",
+        ),
+        shell=True,
+        stdout=PIPE,
+        stderr=STDOUT,
+    )
 
     with process_gibbs.stdout:
         try:
@@ -126,11 +126,13 @@ def ldpred(
     res = res.reset_index(drop=True)
     ss = pd.read_table(processor.sumstats)
 
-    res.columns = ['chrom', 'pos', 'SNP', 'nt1', 'nt2', 'raw_beta', use_col]
+    res.columns = ["chrom", "pos", "SNP", "nt1", "nt2", "raw_beta", use_col]
 
-    adjusted_ss = pd.merge(res,ss,on="SNP")[['CHR', 'BP', 'SNP', 'A1', 'A2', 'N', 'SE', 'P', use_col + '_y']]
+    adjusted_ss = pd.merge(res, ss, on="SNP")[
+        ["CHR", "BP", "SNP", "A1", "A2", "N", "SE", "P", use_col + "_y"]
+    ]
 
-    adjusted_ss.columns = ['CHR', 'BP', 'SNP', 'A1', 'A2', 'N', 'SE', 'P', use_col]
+    adjusted_ss.columns = ["CHR", "BP", "SNP", "A1", "A2", "N", "SE", "P", use_col]
 
     save_path = processor.workdir + "/adjusted_sumstats_ldpred"
 
@@ -140,7 +142,7 @@ def ldpred(
     processor.adjusted_ss["ldpred"] = save_path
 
     processor.tuning["ldpred"] = {}
-    
+
     processor.performance["ldpred"] = {}
 
     print("The ldpred result stores in .adjusted_ss['ldpred']!")
@@ -152,9 +154,7 @@ def ldpred(
         shell=True,
     )
 
-
     print(
         "--- Done in %s ---"
         % (str(datetime.timedelta(seconds=round(time.time() - start_time))))
     )
-

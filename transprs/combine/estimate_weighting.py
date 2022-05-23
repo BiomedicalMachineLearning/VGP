@@ -3,6 +3,7 @@ from transprs.combine.utils import nonneg_lstsq, ols
 import pandas as pd
 import numpy as np
 
+
 def estimate_weighting(processor, methods, trait_col, model="ols", prs_col="SCORESUM"):
 
     prs_results = []
@@ -48,7 +49,9 @@ def estimate_weighting_multipop(
 
     df_pheno = phenotype[trait_col].values.reshape(-1, 1)
 
-    prs_cov = np.hstack([df_prs_all,phenotype.drop(["IID","FID",trait_col],axis=1).values[:,2:]])
+    prs_cov = np.hstack(
+        [df_prs_all, phenotype.drop(["IID", "FID", trait_col], axis=1).values[:, 2:]]
+    )
     # scaler = MinMaxScaler()
     # scaler.fit(df_pheno)
     # df_pheno = scaler.transform(df_pheno)
@@ -58,7 +61,7 @@ def estimate_weighting_multipop(
     else:
         mixing_weight, intercepts = ols(prs_cov, df_pheno.reshape(1, -1)[0])
 
-    return mixing_weight[:len(processors)]
+    return mixing_weight[: len(processors)]
 
 
 def weighting_prs_multipop(
@@ -79,15 +82,17 @@ def weighting_prs_multipop(
 
     df_pheno = phenotype[trait_col].values.reshape(-1, 1)
 
-    prs_cov = np.hstack([df_prs_all,phenotype.drop(["IID","FID",trait_col],axis=1).values[:,2:]])
+    prs_cov = np.hstack(
+        [df_prs_all, phenotype.drop(["IID", "FID", trait_col], axis=1).values[:, 2:]]
+    )
     # scaler = MinMaxScaler()
     # scaler.fit(df_pheno)
     # df_pheno = scaler.transform(df_pheno)
 
     mixing_weight, intercepts = ols(prs_cov, df_pheno.reshape(1, -1)[0])
 
-    print(mixing_weight[:len(processors)])
+    print(mixing_weight[: len(processors)])
 
-    adjusted_prs = df_prs_all @ mixing_weight[:len(processors)]
+    adjusted_prs = df_prs_all @ mixing_weight[: len(processors)]
 
     return adjusted_prs

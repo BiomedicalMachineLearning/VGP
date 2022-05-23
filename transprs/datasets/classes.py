@@ -14,9 +14,13 @@ class DataProcessor(object):
     """
     Main processor class which contains all preprocessing method
     """
-    
+
     def __init__(
-        self, sumstats: pd.DataFrame, test: DataArray, validation: DataArray = None, workdir="./workdir"
+        self,
+        sumstats: pd.DataFrame,
+        test: DataArray,
+        validation: DataArray = None,
+        workdir="./workdir",
     ):
 
         assert type(sumstats) == pd.DataFrame, "Sumstats is not DataFrame!"
@@ -42,22 +46,22 @@ class DataProcessor(object):
         self.performance = OrderedDict()
         self.phenotype = None
         self.phenotype_val = None
-    
+
     def __repr__(self):
-        
+
         descr = f"DataProcessor object:"
         descr += f"\n    Sumstats with {self.ss_shape[0]} SNPs"
         descr += f"\n    Test genotype with {self.pp_shape[0]} samples x {self.pp_shape[1]} SNPs"
-        
-        if hasattr(self, 'validation'):
+
+        if hasattr(self, "validation"):
             descr += f"\n    Validate genotype with {self.val_shape[0]} samples x {self.val_shape[1]} SNPs"
-        
+
         if self.phenotype is not None:
             descr += f"\n    Phenotype of test with {self.ph_shape[0]} samples"
 
         if self.phenotype_val is not None:
             descr += f"\n    Phenotype of validation with {self.phval_shape[0]} samples"
-        
+
         for attr in [
             "adjusted_ss",
             "prs_validation",
@@ -70,8 +74,8 @@ class DataProcessor(object):
                 descr += f"\n    {attr}: {str(list(keys))[1:-1]}"
 
         return descr
-    
-    def clean_snps(self, population:DataArray):
+
+    def clean_snps(self, population: DataArray):
         """
         Clean both sumstats and imputed data
         """
@@ -223,9 +227,11 @@ class DataProcessor(object):
             drop=True
         )
 
-    def add_phenotype(self, population: DataArray, phenotype: pd.DataFrame, id_col="FID"):
+    def add_phenotype(
+        self, population: DataArray, phenotype: pd.DataFrame, id_col="FID"
+    ):
 
-        if population.name == 'validation':
+        if population.name == "validation":
             self.phenotype_val = phenotype
             self.phval_shape = phenotype.shape
             print("Phenotype stored in .phenotype_val")
@@ -234,14 +240,7 @@ class DataProcessor(object):
             self.ph_shape = phenotype.shape
             print("Phenotype stored in .phenotype")
 
-            
-        
-        
-        population = population.where(
-            population.fid.isin(phenotype[id_col]), drop=True
-        )
-        
-        
+        population = population.where(population.fid.isin(phenotype[id_col]), drop=True)
 
     # def cross_validation_split(self, k_folds=5, n_repeats=10, id_col="FID"):
 
@@ -265,7 +264,7 @@ class DataProcessor(object):
     def compute_pca(self, population: DataArray, n_components, id_col="FID"):
         from transprs.utils import tmp_extract
 
-        tmp_extract(processor=self,population=population)
+        tmp_extract(processor=self, population=population)
 
         process_prune = Popen(
             """
@@ -314,46 +313,59 @@ class DataProcessor(object):
 
     def store_path(self):
 
-        
         try:
             os.mkdir(self.workdir)
-            print ("Created folder %s for working directory" % self.workdir)
+            print("Created folder %s for working directory" % self.workdir)
         except:
             pass
 
         self.sumstats.to_csv(
             self.workdir + "/preprocessed_sumstats", sep="\t", index=False
         )
-        
-        print ("Stored sumstats %s in working directory" % (self.workdir + "/preprocessed_sumstats"))
+
+        print(
+            "Stored sumstats %s in working directory"
+            % (self.workdir + "/preprocessed_sumstats")
+        )
 
         write_plink1_bin(
             self.test, self.workdir + "/preprocessed_test.bed", verbose=False
         )
 
-        print ("Stored test genotype %s in working directory" % (self.workdir + "/preprocessed_test"))
+        print(
+            "Stored test genotype %s in working directory"
+            % (self.workdir + "/preprocessed_test")
+        )
 
-        if hasattr(self, 'validation'):
+        if hasattr(self, "validation"):
             write_plink1_bin(
-                self.validation, self.workdir + "/preprocessed_validation.bed", verbose=False
+                self.validation,
+                self.workdir + "/preprocessed_validation.bed",
+                verbose=False,
             )
 
-            print ("Stored validation genotype %s in working directory" % (self.workdir + "/preprocessed_test"))
+            print(
+                "Stored validation genotype %s in working directory"
+                % (self.workdir + "/preprocessed_test")
+            )
 
             self.validation = self.workdir + "/preprocessed_validation"
 
-            self.phenotype_val.to_csv(self.workdir + "/phenotype_val", index=False, sep="\t")
+            self.phenotype_val.to_csv(
+                self.workdir + "/phenotype_val", index=False, sep="\t"
+            )
 
             self.phenotype_val = self.workdir + "/phenotype_val"
 
-
         self.phenotype.to_csv(self.workdir + "/phenotype", index=False, sep="\t")
-        print ("Stored test genotype %s in working directory" % (self.workdir + "/preprocessed_test"))
+        print(
+            "Stored test genotype %s in working directory"
+            % (self.workdir + "/preprocessed_test")
+        )
 
         self.sumstats = self.workdir + "/preprocessed_sumstats"
         self.test = self.workdir + "/preprocessed_test"
         self.phenotype = self.workdir + "/phenotype"
-        
 
     # def estimate_heritability(self):
     #     """

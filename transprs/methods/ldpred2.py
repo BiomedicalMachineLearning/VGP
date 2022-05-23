@@ -32,19 +32,28 @@ def ldpred2(
 
     ss = pd.read_table(processor.sumstats)
 
-    renamed_ss = ss.rename(columns={'CHR': 'chr', 'SNP': 'rsid',
-                  'BP': 'pos', 'A1': 'a0',
-                  'A2': 'a1', 'BETA': 'beta',
-                  'P': 'p', 'N': 'n_eff',
-                  'SE': 'beta_se', 'FRQ':'frq'})
+    renamed_ss = ss.rename(
+        columns={
+            "CHR": "chr",
+            "SNP": "rsid",
+            "BP": "pos",
+            "A1": "a0",
+            "A2": "a1",
+            "BETA": "beta",
+            "P": "p",
+            "N": "n_eff",
+            "SE": "beta_se",
+            "FRQ": "frq",
+        }
+    )
 
-    renamed_ss.to_csv("tmp_ss.ss",sep="\t",index=False)
+    renamed_ss.to_csv("tmp_ss.ss", sep="\t", index=False)
 
     robjects.globalenv["CHRs"] = renamed_ss.chr.unique()
 
     # Main processing
     robjects.r(
-    """
+        """
     options(stringsAsFactors = FALSE)
     NCORES=1
     library(bigsnpr)
@@ -75,7 +84,7 @@ def ldpred2(
         ind.chr3 <- match(ind.chr2, which(map_ldref$chr == chr))
 
         corr_chr <- readRDS(paste0(ldref_path,"/LD_chr", chr, ".rds"))[ind.chr3, ind.chr3]
- 
+
 
         if (chr == CHRs[1]) {
           corr <- as_SFBM(corr_chr, tmp)
@@ -83,15 +92,15 @@ def ldpred2(
           corr$add_columns(corr_chr, nrow(corr))
         }
       }
-      
+
     (ldsc <- with(df_beta, snp_ldsc(ld, ld_size = nrow(map_ldref),
                                   chi2 = (beta / beta_se)^2,
                                   sample_size = n_eff,
                                   ncores = NCORES)))
     h2_est <- ldsc[["h2"]]
-    
+
     beta_inf <- snp_ldpred2_inf(corr, df_beta, h2 = h2_est)
-  
+
     """
     )
 
@@ -110,7 +119,7 @@ def ldpred2(
     processor.adjusted_ss["ldpred2"] = save_path
 
     processor.tuning["ldpred2"] = {}
-    
+
     processor.performance["ldpred2"] = {}
 
     print("The Ldpred-2 result stores in .adjusted_ss['ldpred2']!")
@@ -122,9 +131,7 @@ def ldpred2(
         shell=True,
     )
 
-
     print(
         "--- Done in %s ---"
         % (str(datetime.timedelta(seconds=round(time.time() - start_time))))
     )
-

@@ -19,5 +19,3 @@ def tmp_extract(processor, population, method=None):
         processor.phenotype[processor.phenotype.columns[:3]].to_csv(
             "tmp_phenotype", index=False, sep=" "
         )
-
-    

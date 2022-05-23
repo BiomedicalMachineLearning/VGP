@@ -6,12 +6,13 @@ import pandas as pd
 import numpy as np
 import transprs as tprs
 
+
 def SBayesR(
     processor,
     ldm,
-    pi = [0.95,0.02,0.02,0.01],
-    gamma = [0.0,0.01,0.1,1],
-    out_freq = 100,
+    pi=[0.95, 0.02, 0.02, 0.01],
+    gamma=[0.0, 0.01, 0.1, 1],
+    out_freq=100,
     chain_length=1000,
     burnin=100,
     random_state=1,
@@ -40,8 +41,8 @@ def SBayesR(
     print("SBayesR is running...")
 
     ss = pd.read_table(processor.sumstats)
-    tmp = ss[["SNP","A1","A2","FRQ","BETA","SE","P","N"]]
-    tmp.to_csv("tmp.cojo", sep="\t",index=False)
+    tmp = ss[["SNP", "A1", "A2", "FRQ", "BETA", "SE", "P", "N"]]
+    tmp.to_csv("tmp.cojo", sep="\t", index=False)
 
     process_main = Popen(
         """
@@ -62,7 +63,7 @@ def SBayesR(
             ",".join(np.array(gamma).astype(str)),
             str(chain_length),
             str(burnin),
-            str(out_freq)
+            str(out_freq),
         ),
         shell=True,
         stdout=PIPE,
@@ -77,11 +78,24 @@ def SBayesR(
         except CalledProcessError as e:
             print(f"{str(e)}")
 
-    sbayesR_result = pd.read_table("tmp_result.snpRes",sep="\s+")
-    sbayesR_result = sbayesR_result[["Name","A1Effect"]]
-    sbayesR_result.columns = ["SNP","BETA"]
-    adjusted_ss = pd.merge(ss,sbayesR_result,on="SNP")[['CHR', 'BP', 'SNP', 'A1', 'A2', 'N', 'SE', 'P', 'BETA_y', 'FRQ']]
-    adjusted_ss.columns = ['CHR', 'BP', 'SNP', 'A1', 'A2', 'N', 'SE', 'P', 'BETA', 'FRQ']
+    sbayesR_result = pd.read_table("tmp_result.snpRes", sep="\s+")
+    sbayesR_result = sbayesR_result[["Name", "A1Effect"]]
+    sbayesR_result.columns = ["SNP", "BETA"]
+    adjusted_ss = pd.merge(ss, sbayesR_result, on="SNP")[
+        ["CHR", "BP", "SNP", "A1", "A2", "N", "SE", "P", "BETA_y", "FRQ"]
+    ]
+    adjusted_ss.columns = [
+        "CHR",
+        "BP",
+        "SNP",
+        "A1",
+        "A2",
+        "N",
+        "SE",
+        "P",
+        "BETA",
+        "FRQ",
+    ]
     save_path = processor.workdir + "/adjusted_sumstats_SBayesR"
 
     # Saving result
@@ -90,7 +104,7 @@ def SBayesR(
     processor.adjusted_ss["SBayesR"] = save_path
 
     processor.tuning["SBayesR"] = {}
-    
+
     processor.performance["SBayesR"] = {}
 
     print("The SBayesR result stores in .adjusted_ss['SBayesR']!")
@@ -101,7 +115,6 @@ def SBayesR(
         """,
         shell=True,
     )
-    
 
     print(
         "--- Done in %s ---"

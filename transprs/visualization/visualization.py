@@ -5,15 +5,15 @@ import pandas as pd
 
 
 def visualize_performance(
-    processor, 
-    metric, 
+    processor,
+    metric,
     validate=False,
-    cmap="Dark2", 
-    plot_type="box_plot", 
+    cmap="Dark2",
+    plot_type="box_plot",
     figsize=(7, 7),
     fname=None,
-    dpi=96
-):  
+    dpi=96,
+):
 
     if validate:
         performance = processor.tuning
@@ -31,11 +31,11 @@ def visualize_performance(
 
     performance_df = pd.DataFrame.from_dict(performance)
     selected_metric_df = pd.DataFrame(performance_df.loc[metric]).T
-    
+
     label = selected_metric_df.columns
-    
+
     refined_label = list(map(lambda x: refine_labels(x), label))
-    
+
     selected_metric_df.columns = refined_label
 
     if plot_type == "box_plot":
@@ -46,8 +46,7 @@ def visualize_performance(
         )
 
         mpl.pyplot.xticks(rotation=45)
-        plt.xticks(ha='right')
-
+        plt.xticks(ha="right")
 
     if plot_type == "bar_plot":
         sns.barplot(data=selected_metric_df.apply(pd.Series.explode), palette=cmap)
@@ -57,11 +56,11 @@ def visualize_performance(
         )
 
         mpl.pyplot.xticks(rotation=45)
-        plt.xticks(ha='right')
-
+        plt.xticks(ha="right")
 
     if fname != None:
         mpl.pyplot.savefig(fname, bbox_inches="tight", pad_inches=0, dpi=dpi)
+
 
 def refine_labels(label):
     if "+" in label:

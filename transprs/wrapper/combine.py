@@ -1,6 +1,7 @@
 import transprs as tprs
 import itertools
 
+
 def Combine_inpop_methods(
     processor, methods, model, prs_col, trait_col, use_col, metric="r2_score"
 ):
@@ -38,12 +39,12 @@ def Combine_multipop_methods(
     processors, methods, prs_col, trait_col, use_col, metric="r2_score"
 ):
 
-    subsets = list(itertools.product(*[methods]*len(processors)))
-    
+    subsets = list(itertools.product(*[methods] * len(processors)))
+
     new_subsets = []
     for subset in subsets:
         track = 0
-        for i,method in enumerate(list(subset)):
+        for i, method in enumerate(list(subset)):
             if method in processors[i].adjusted_ss.keys():
                 track += 1
         if track == len(processors):
@@ -65,9 +66,17 @@ def Combine_multipop_methods(
 
         if metric == "r2_score":
             tprs.metrics.r2_score_evaluation(
-                processors[0], method="+".join(new_subset), trait_col=trait_col, prs_col=prs_col, validate=False
+                processors[0],
+                method="+".join(new_subset),
+                trait_col=trait_col,
+                prs_col=prs_col,
+                validate=False,
             )
         elif metric == "coef_squared":
             tprs.metrics.coef_squared_evaluation(
-                processors[0], method="+".join(new_subset), trait_col=trait_col, prs_col=prs_col, validate=False
+                processors[0],
+                method="+".join(new_subset),
+                trait_col=trait_col,
+                prs_col=prs_col,
+                validate=False,
             )

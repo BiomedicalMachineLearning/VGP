@@ -79,7 +79,7 @@ def mcmc(
 
         err = max(
             n / 2.0 * (1.0 - 2.0 * sum(beta * beta_mrg) + quad),
-            n / 2.0 * sum(beta ** 2 / psi),
+            n / 2.0 * sum(beta**2 / psi),
         )
         sigma = 1.0 / random.gamma((n + p) / 2.0, 1.0 / err)
 
