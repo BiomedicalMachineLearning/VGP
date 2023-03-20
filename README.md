@@ -9,7 +9,7 @@
 ### Prepare dataset
 
 You need to download from this ggdrive link:
-- data.zip: [https://drive.google.com/file/d/1ZsbfabvwnssMiji6ECDieg1C7mJNhvYm/view?usp=sharing](https://drive.google.com/file/d/1ZsbfabvwnssMiji6ECDieg1C7mJNhvYm/view?usp=sharing)
+- data.zip: [https://drive.google.com/file/d/1EVVIpVa_9sr_S8Raq_54kJ9Y67dxLdde/view?usp=share_link](https://drive.google.com/file/d/1EVVIpVa_9sr_S8Raq_54kJ9Y67dxLdde/view?usp=share_link)
 
 Unzip the data.zip file and put into the `tutorials` folder 
 
